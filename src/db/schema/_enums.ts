@@ -5,3 +5,13 @@ export const taskStatusEnum = pgEnum('task_status', [
   'IN_PROGRESS',
   'DONE',
 ]);
+
+export const taskPriorityEnum = pgEnum('task_priority', [
+  'LOW',
+  'MEDIUM',
+  'HIGH',
+]);
+export const collaboratorRoleEnum = pgEnum('collaborator_role', [
+  'VIEWER',
+  'EDITOR',
+]);

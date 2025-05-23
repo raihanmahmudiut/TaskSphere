@@ -1,0 +1,11 @@
+# .dockerignore
+node_modules
+npm-debug.log
+yarn-error.log
+dist
+.git
+.DS_Store
+*.env
+*.env.local
+drizzle # Drizzle migration artifacts, can be generated in container
+# Add any other build artifacts or local config files
