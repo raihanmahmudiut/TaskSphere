@@ -9,7 +9,7 @@ export const todoAppCollaborators = pgTable(
   {
     userId: integer('user_id')
       .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
+      .references(() => users.uuid, { onDelete: 'cascade' }),
     todoAppId: integer('todo_app_id')
       .notNull()
       .references(() => todoApps.id, { onDelete: 'cascade' }),
@@ -30,7 +30,7 @@ export const todoAppCollaboratorsRelations = relations(
   ({ one }) => ({
     user: one(users, {
       fields: [todoAppCollaborators.userId],
-      references: [users.id],
+      references: [users.uuid],
     }),
     todoApp: one(todoApps, {
       fields: [todoAppCollaborators.todoAppId],

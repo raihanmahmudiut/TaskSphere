@@ -4,13 +4,13 @@ services:
     build:
       context: .
       target: development # Use the development stage from Dockerfile
-    container_name: taskshpere-app
+    container_name: tasksphere-app
     ports:
-      - "${APP_PORT_HOST:-3000}:${PORT:-3000}" # Map host port 3000 to container port 3000
+      - "${APP_PORT_HOST:-4000}:${PORT:-4000}" # Map host port 3000 to container port 3000
     volumes:
       - .:/usr/src/app # Mount current directory to app directory in container (for hot-reloading)
       - /usr/src/app/node_modules # Prevent host node_modules from overwriting container's
-      - /usr/src/app/dist # Ensure dist is not overwritten by host if it exists
+      # - /usr/src/app/dist # Ensure dist is not overwritten by host if it exists
     env_file:
       - .env.local # Load environment variables from .env.local
     depends_on:
@@ -18,11 +18,11 @@ services:
         condition: service_healthy # Wait for DB to be healthy
     restart: unless-stopped
     networks:
-      - taskshpere-network
+      - tasksphere-network
 
   db:
     image: postgres:15-alpine # Or postgres:latest
-    container_name: taskshpere-db
+    container_name: tasksphere-db
     ports:
       - "${DB_PORT_HOST:-5432}:5432" # Map host port 5432 to container port 5432
     environment:
@@ -38,11 +38,11 @@ services:
       retries: 5
     restart: unless-stopped
     networks:
-      - taskshpere-network
+      - tasksphere-network
 
 volumes:
   pgdata: # Named volume for PostgreSQL data persistence
 
 networks:
-  taskshpere-network:
-    driver: host
+  tasksphere-network:
+    driver: bridge

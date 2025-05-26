@@ -1,22 +1,21 @@
+// src/modules/drizzle/drizzle.provider.ts
 import {
-  DRIZZLE_ORM,
+  DRIZZLE_PROVIDER,
   NEST_DRIZZLE_OPTIONS,
-} from 'src/core/constants/db.constants';
-import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+} from '@app/core/constants/db.constants'; // Corrected path
 import { DrizzleService } from './drizzle.service';
-import { NestDrizzleOptions } from './interfaces/drizzle.interfaces';
 
 export const connectionFactory = {
-  provide: DRIZZLE_ORM,
-  useFactory: async (nestDrizzleService: {
-    getDrizzle: () => Promise<PostgresJsDatabase>;
-  }) => {
-    return nestDrizzleService.getDrizzle();
+  provide: DRIZZLE_PROVIDER,
+  useFactory: async (drizzleServiceInstance: DrizzleService) => {
+    return drizzleServiceInstance.getDrizzle();
   },
   inject: [DrizzleService],
 };
 
-export function createNestDrizzleProviders(options: NestDrizzleOptions) {
+export function createNestDrizzleProviders(
+  options: /* NestDrizzleOptions */ any,
+) {
   return [
     {
       provide: NEST_DRIZZLE_OPTIONS,

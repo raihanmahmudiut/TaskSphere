@@ -15,7 +15,7 @@ export const todoApps = pgTable('todo_apps', {
   name: varchar('name', { length: 255 }).notNull(),
   ownerId: integer('owner_id')
     .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }), // If owner is deleted, their apps are deleted
+    .references(() => users.uuid, { onDelete: 'cascade' }), // If owner is deleted, their apps are deleted
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -27,7 +27,7 @@ export const todoApps = pgTable('todo_apps', {
 export const todoAppsRelations = relations(todoApps, ({ one, many }) => ({
   owner: one(users, {
     fields: [todoApps.ownerId],
-    references: [users.id],
+    references: [users.uuid],
     relationName: 'ownedApps',
   }),
   tasks: many(tasks),

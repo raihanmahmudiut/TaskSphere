@@ -1,10 +1,10 @@
 import {
   pgTable,
-  serial,
   text,
   varchar,
   timestamp,
   uniqueIndex,
+  uuid,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { todoApps } from './todoApps';
@@ -13,7 +13,7 @@ import { todoAppCollaborators } from './todoAppCollaborators';
 export const users = pgTable(
   'users',
   {
-    id: serial('id').primaryKey(), // Or use uuid: uuid('id').defaultRandom().primaryKey()
+    uuid: uuid('id').defaultRandom().primaryKey(),
     name: varchar('name', { length: 255 }),
     email: varchar('email', { length: 255 }).notNull().unique(),
     hashedPassword: text('hashed_password').notNull(),

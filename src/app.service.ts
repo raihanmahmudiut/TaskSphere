@@ -1,12 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { DRIZZLE_ORM } from './core/constants/db.constants';
+import { DRIZZLE_PROVIDER } from './core/constants/db.constants';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import * as schema from '@app/modules/drizzle/schema';
+import schema from '../src/db/index';
 
 @Injectable()
 export class AppService {
   constructor(
-    @Inject(DRIZZLE_ORM) private conn: PostgresJsDatabase<typeof schema>,
+    @Inject(DRIZZLE_PROVIDER) private conn: PostgresJsDatabase<typeof schema>,
   ) {}
   getHello(): string {
     return 'Hello World!';

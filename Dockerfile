@@ -10,8 +10,9 @@
     # Install dependencies first to leverage Docker cache
     COPY package.json yarn.lock ./
     # Optionally copy .yarnrc if you created one
-    COPY .yarnrc ./
-    RUN yarn config set network-timeout 600000 && \
+    # COPY .yarnrc ./
+    RUN echo "Attempting yarn install (yarnpkg.com should be mapped via --add-host)..." && \
+    yarn config set network-timeout 300000 && \
     yarn install --frozen-lockfile --verbose
     
     # ---- Development Stage ----
@@ -19,7 +20,7 @@
     # Copy all source code
     COPY . .
     # Expose the port NestJS runs on (default is 3000)
-    EXPOSE 3000
+    EXPOSE 4000
     # Command to run in development (with hot-reloading)
     CMD ["yarn", "start:dev"]
     
@@ -36,5 +37,5 @@
     COPY package.json yarn.lock ./
     # Install only production dependencies
     RUN yarn install --production --frozen-lockfile
-    EXPOSE 3000
+    EXPOSE 4000
     CMD ["node", "dist/main"]

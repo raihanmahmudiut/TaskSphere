@@ -9,57 +9,41 @@ import {
   NestDrizzleOptions,
   NestDrizzleOptionsFactory,
 } from './interfaces/drizzle.interfaces';
-import { NEST_DRIZZLE_OPTIONS } from 'src/core/constants/db.constants';
+import { NEST_DRIZZLE_OPTIONS } from '@app/core/constants/db.constants';
 
 @Global()
-@Module({
-  providers: [DrizzleService, connectionFactory],
-  exports: [DrizzleService, connectionFactory],
-})
+@Module({})
 export class NestDrizzleModule {
-  public static register(options: NestDrizzleOptions): DynamicModule {
-    return {
-      module: NestDrizzleModule,
-      providers: createNestDrizzleProviders(options),
-    };
-  }
-
-  public static registerAsync(options: NestDrizzleAsyncOptions): DynamicModule {
-    return {
-      module: NestDrizzleModule,
-      providers: [...this.createProviders(options)],
-    };
-  }
-
   public static forRoot(options: NestDrizzleOptions): DynamicModule {
-    const providers = createNestDrizzleProviders(options);
+    const providers = [
+      ...createNestDrizzleProviders(options),
+      DrizzleService,
+      connectionFactory,
+    ];
     return {
       module: NestDrizzleModule,
       providers: providers,
-      exports: providers,
+      exports: [connectionFactory, DrizzleService],
     };
   }
 
   public static forRootAsync(options: NestDrizzleAsyncOptions): DynamicModule {
-    return {
-      module: NestDrizzleModule,
-      providers: [...this.createProviders(options)],
-      exports: [...this.createProviders(options)],
-    };
-  }
+    const optionProvider = this.createOptionsProvider(options);
+    const providers = [optionProvider, DrizzleService, connectionFactory];
 
-  private static createProviders(options: NestDrizzleAsyncOptions): Provider[] {
-    if (options.useExisting || options.useFactory) {
-      return [this.createOptionsProvider(options)];
-    }
-
-    return [
-      this.createOptionsProvider(options),
-      {
+    if (options.useClass && !options.useExisting && !options.useFactory) {
+      providers.push({
         provide: options.useClass,
         useClass: options.useClass,
-      },
-    ];
+      });
+    }
+
+    return {
+      module: NestDrizzleModule,
+      imports: options.imports || [],
+      providers: providers,
+      exports: [connectionFactory, DrizzleService],
+    };
   }
 
   private static createOptionsProvider(
