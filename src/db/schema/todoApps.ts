@@ -4,6 +4,7 @@ import {
   varchar,
   integer,
   timestamp,
+  uuid,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { users } from './users';
@@ -13,7 +14,7 @@ import { todoAppCollaborators } from './todoAppCollaborators';
 export const todoApps = pgTable('todo_apps', {
   id: serial('id').primaryKey(), // Or uuid
   name: varchar('name', { length: 255 }).notNull(),
-  ownerId: integer('owner_id')
+  ownerId: uuid('owner_id')
     .notNull()
     .references(() => users.uuid, { onDelete: 'cascade' }), // If owner is deleted, their apps are deleted
   createdAt: timestamp('created_at', { mode: 'date', withTimezone: true })

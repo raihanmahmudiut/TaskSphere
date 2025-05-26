@@ -28,7 +28,9 @@
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/platform-socket.io": "^10.4.18",
     "@nestjs/swagger": "^7.1.17",
+    "@nestjs/websockets": "^10.4.18",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
@@ -41,7 +43,10 @@
     "postgres": "^3.4.3",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
-    "swagger": "^0.7.5"
+    "socket.io": "^4.8.1",
+    "swagger": "^0.7.5",
+    "swagger-ui-express": "^5.0.1",
+    "todo": "file:"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",

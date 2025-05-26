@@ -1,10 +1,20 @@
-// src/main.ts
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { Logger } from '@nestjs/common'; // Import NestJS Logger
+
+import { Logger } from '@nestjs/common'; // Import NestJS Logge
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  const config = new DocumentBuilder()
+    .setTitle('TaskSphere API')
+    .setDescription('API documentation')
+    .setVersion('1.0')
+    .addTag('tasks')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
 
   const port = process.env.PORT || 3000;
   Logger.log(
@@ -14,8 +24,6 @@ async function bootstrap() {
 
   try {
     await app.listen(port);
-    // If app.listen() is successful, NestJS should log its own "listening" message.
-    // We add our own as a fallback and confirmation.
     Logger.log(
       `[Bootstrap] Successfully called app.listen. Application SHOULD BE running on: http://localhost:${port}`,
       'Bootstrap',

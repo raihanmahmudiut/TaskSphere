@@ -15,6 +15,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { NestDrizzleModule } from './modules/drizzle/drizzle.module';
 import * as schema from '../src/db/index';
 import { AuthModule } from './modules/auth/auth.module';
+import { WebsocketGateway } from './modules/websocket/websocket.gateway';
+import { TodoModule } from './modules/todo/todo.module';
+import { TasksModule } from './modules/tasks/tasks.module';
 
 @Module({
   imports: [
@@ -41,6 +44,9 @@ import { AuthModule } from './modules/auth/auth.module';
     }),
     UsersModule,
     AuthModule, // Add AuthModule here
+    WebsocketGateway,
+    TodoModule,
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [
