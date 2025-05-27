@@ -2,17 +2,27 @@ import { IsString, IsNotEmpty, IsOptional, IsDate } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateTodoDto {
-  @ApiProperty({ description: 'Title of the todo' })
+  @ApiProperty({
+    description: 'The name of the ToDo app',
+    example: 'Project Phoenix',
+  })
   @IsString()
   @IsNotEmpty()
-  title: string;
+  name: string;
 
-  @ApiProperty({ description: 'Description of the todo', required: false })
+  @ApiProperty({
+    description: 'An optional description for the ToDo app',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   description?: string;
 
-  @ApiProperty({ description: 'Due date of the todo', type: Date, required: false })
+  @ApiProperty({
+    description: 'An optional due date for the ToDo app',
+    type: Date,
+    required: false,
+  })
   @IsDate()
   @IsOptional()
   dueDate?: Date;

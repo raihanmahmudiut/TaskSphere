@@ -1,15 +1,4 @@
-import { IsString, IsOptional, IsDate } from 'class-validator';
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateTodoDto } from './create-todo.dto';
 
-export class UpdateTodoDto {
-  @IsString()
-  @IsOptional()
-  title?: string;
-
-  @IsString()
-  @IsOptional()
-  description?: string;
-
-  @IsDate()
-  @IsOptional()
-  dueDate?: Date;
-}
+export class UpdateTodoDto extends PartialType(CreateTodoDto) {}

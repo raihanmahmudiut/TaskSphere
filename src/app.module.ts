@@ -17,8 +17,7 @@ import * as schema from '../src/db/index';
 import { AuthModule } from './modules/auth/auth.module';
 import { WebsocketGateway } from './modules/websocket/websocket.gateway';
 import { TodoModule } from './modules/todo/todo.module';
-import { TasksModule } from './modules/tasks/tasks.module';
-
+import { WebsocketModule } from './modules/websocket/websocket.module'; // Import WebsocketModule
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -43,10 +42,10 @@ import { TasksModule } from './modules/tasks/tasks.module';
       },
     }),
     UsersModule,
-    AuthModule, // Add AuthModule here
+    AuthModule,
     WebsocketGateway,
     TodoModule,
-    TasksModule,
+    WebsocketModule,
   ],
   controllers: [AppController],
   providers: [

@@ -22,7 +22,10 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @ApiOperation({ summary: 'Register a new user' })
-  @ApiResponse({ status: 201, description: 'The user has been successfully registered.' })
+  @ApiResponse({
+    status: 201,
+    description: 'The user has been successfully registered.',
+  })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
@@ -31,7 +34,10 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: 'Login user' })
-  @ApiResponse({ status: 200, description: 'The user has been successfully logged in.' })
+  @ApiResponse({
+    status: 200,
+    description: 'The user has been successfully logged in.',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(LocalAuthGuard)
   @Post('login')
