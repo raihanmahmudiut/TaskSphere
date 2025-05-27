@@ -14,7 +14,6 @@ export class AppService {
 
   async getUser() {
     console.log(this.conn);
-    // return 'test'
     return this.conn.select().from(schema.users);
   }
 }

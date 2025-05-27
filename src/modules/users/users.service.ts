@@ -7,18 +7,14 @@ import {
 import * as bcrypt from 'bcrypt';
 import { eq } from 'drizzle-orm';
 import { DRIZZLE_PROVIDER } from '@app/core/constants/db.constants';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres'; // Use the correct Drizzle client type based on your provider
-import * as allSchema from '@app/db/index'; // Import all named exports
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import * as allSchema from '@app/db/index';
 import { CreateUserDto } from './dto/create-user.dto';
 
-// Infer types directly from the specific table schema
 export type User = typeof allSchema.users.$inferSelect;
 export type NewUser = typeof allSchema.users.$inferInsert;
 
-// Your DrizzleClient type should match what DrizzleProvider actually provides.
-// If DrizzleProvider provides NodePgDatabase<typeof allSchema>, use that.
-// For simplicity, let's assume it's NodePgDatabase<any> for now, but ideally type it with your full schema.
-export type DrizzleClient = NodePgDatabase<typeof allSchema>; // More specific type
+export type DrizzleClient = NodePgDatabase<typeof allSchema>;
 
 @Injectable()
 export class UsersService {
@@ -29,7 +25,6 @@ export class UsersService {
   ): Promise<Omit<User, 'hashedPassword'>> {
     const { email, password, name } = createUserDto;
 
-    // Use the correctly imported 'users' table object
     const existingUser = await this.db.query.users.findFirst({
       where: eq(allSchema.users.email, email.toLowerCase()),
     });
@@ -39,21 +34,20 @@ export class UsersService {
     }
 
     const saltOrRounds = 10;
-    // Ensure your users schema has 'hashedPassword' not 'passwordHash'
     const hashedPassword = await bcrypt.hash(password, saltOrRounds);
 
     try {
       const newUserPayload: NewUser = {
         email: email.toLowerCase(),
-        hashedPassword, // Match this to your schema field name
+        hashedPassword,
         name: name || null,
       };
 
       const insertedUsers = await this.db
-        .insert(allSchema.users) // Use the specific users table
+        .insert(allSchema.users)
         .values(newUserPayload)
         .returning({
-          uuid: allSchema.users.uuid, // Match your schema: 'uuid' not 'id'
+          uuid: allSchema.users.uuid,
           email: allSchema.users.email,
           name: allSchema.users.name,
           createdAt: allSchema.users.createdAt,
@@ -85,7 +79,7 @@ export class UsersService {
     const user = await this.db.query.users.findFirst({
       where: eq(allSchema.users.uuid, userId),
       columns: {
-        hashedPassword: false, // Exclude hashedPassword
+        hashedPassword: false,
       },
     });
     return user as Omit<User, 'hashedPassword'> | undefined;

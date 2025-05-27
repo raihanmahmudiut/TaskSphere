@@ -1,0 +1,667 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "operationId": "AppController_getUser",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/users/me": {
+      "get": {
+        "operationId": "UsersController_getProfile",
+        "summary": "Get user profile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Return user profile."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "operationId": "AuthController_register",
+        "summary": "Register a new user",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The user has been successfully registered."
+          },
+          "400": {
+            "description": "Bad Request."
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "summary": "Login user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The user has been successfully logged in."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/profile": {
+      "get": {
+        "operationId": "AuthController_getProfile",
+        "summary": "Get user profile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Return user profile."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/todo": {
+      "post": {
+        "operationId": "TodoController_create",
+        "summary": "Create a new todo app",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTodoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "todo"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "TodoController_findAllForUser",
+        "summary": "Get all todo apps for the current user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "todo"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/todo/{id}": {
+      "get": {
+        "operationId": "TodoController_findOne",
+        "summary": "Get a todo app by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "todo"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "TodoController_update",
+        "summary": "Update a todo app",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTodoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "todo"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "TodoController_remove",
+        "summary": "Delete a todo app",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "todo"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/todo/{id}/collaborators": {
+      "post": {
+        "operationId": "TodoController_addCollaborator",
+        "summary": "Add a collaborator to a todo app (Owner only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "todo"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/todo/{id}/collaborators/{userId}": {
+      "patch": {
+        "operationId": "TodoController_assignRole",
+        "summary": "Assign/update a role for a collaborator (Owner only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "todo"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "TodoController_removeCollaborator",
+        "summary": "Remove a collaborator from a todo app (Owner only)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "todo"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/todo/{todoId}/tasks": {
+      "post": {
+        "operationId": "TodoController_createTask",
+        "summary": "Create a new task within a todo app",
+        "parameters": [
+          {
+            "name": "todoId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTaskDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "todo"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "TodoController_getTasksForApp",
+        "summary": "Get all tasks for a specific todo app",
+        "parameters": [
+          {
+            "name": "todoId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "todo"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/todo/{todoId}/tasks/{taskId}": {
+      "patch": {
+        "operationId": "TodoController_updateTask",
+        "summary": "Update a task",
+        "parameters": [
+          {
+            "name": "todoId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTaskDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "todo"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "TodoController_removeTask",
+        "summary": "Delete a task",
+        "parameters": [
+          {
+            "name": "todoId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "todo"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "TaskSphere API",
+    "description": "API documentation",
+    "version": "1.0",
+    "contact": {
+
+    }
+  },
+  "tags": [
+    {
+      "name": "tasks",
+      "description": ""
+    }
+  ],
+  "servers": [],
+  "components": {
+    "schemas": {
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "user@example.com",
+            "description": "The email address of the user"
+          },
+          "password": {
+            "type": "string",
+            "example": "strongPassword123",
+            "description": "The password for the user (min 6 characters)"
+          },
+          "name": {
+            "type": "string",
+            "example": "John Doe",
+            "description": "The full name of the user"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "CreateTodoDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the ToDo app",
+            "example": "Project Phoenix"
+          },
+          "description": {
+            "type": "string",
+            "description": "An optional description for the ToDo app"
+          },
+          "dueDate": {
+            "format": "date-time",
+            "type": "string",
+            "description": "An optional due date for the ToDo app"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateTodoDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the ToDo app",
+            "example": "Project Phoenix"
+          },
+          "description": {
+            "type": "string",
+            "description": "An optional description for the ToDo app"
+          },
+          "dueDate": {
+            "format": "date-time",
+            "type": "string",
+            "description": "An optional due date for the ToDo app"
+          }
+        }
+      },
+      "CreateTaskDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Integrate Drizzle ORM",
+            "description": "The title of the task"
+          },
+          "description": {
+            "type": "string",
+            "example": "Refactor services to use Drizzle for DB queries.",
+            "description": "A detailed description of the task"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "TODO",
+              "IN_PROGRESS",
+              "DONE"
+            ],
+            "default": "TODO",
+            "description": "The current status of the task"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "LOW",
+              "MEDIUM",
+              "HIGH"
+            ],
+            "description": "The priority of the task"
+          },
+          "dueDate": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2025-12-31",
+            "description": "The due date for the task"
+          }
+        },
+        "required": [
+          "title",
+          "status"
+        ]
+      },
+      "UpdateTaskDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "Integrate Drizzle ORM",
+            "description": "The title of the task"
+          },
+          "description": {
+            "type": "string",
+            "example": "Refactor services to use Drizzle for DB queries.",
+            "description": "A detailed description of the task"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "TODO",
+              "IN_PROGRESS",
+              "DONE"
+            ],
+            "default": "TODO",
+            "description": "The current status of the task"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "LOW",
+              "MEDIUM",
+              "HIGH"
+            ],
+            "description": "The priority of the task"
+          },
+          "dueDate": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2025-12-31",
+            "description": "The due date for the task"
+          }
+        }
+      }
+    }
+  }
+}

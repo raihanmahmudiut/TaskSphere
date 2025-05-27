@@ -1,4 +1,10 @@
-import { pgTable, integer, primaryKey, timestamp, uuid } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  integer,
+  primaryKey,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { users } from './users';
 import { todoApps } from './todoApps';
@@ -13,7 +19,9 @@ export const todoAppCollaborators = pgTable(
     todoAppId: integer('todo_app_id')
       .notNull()
       .references(() => todoApps.id, { onDelete: 'cascade' }),
-    role: collaboratorRoleEnum('role').notNull().default('VIEWER' as CollaboratorRole),
+    role: collaboratorRoleEnum('role')
+      .notNull()
+      .default('VIEWER' as CollaboratorRole),
     assignedAt: timestamp('assigned_at', { mode: 'date', withTimezone: true })
       .defaultNow()
       .notNull(),

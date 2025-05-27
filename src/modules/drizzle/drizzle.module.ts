@@ -9,7 +9,10 @@ import {
   NestDrizzleOptions,
   NestDrizzleOptionsFactory,
 } from './interfaces/drizzle.interfaces';
-import { NEST_DRIZZLE_OPTIONS } from '@app/core/constants/db.constants';
+import {
+  DRIZZLE_PROVIDER,
+  NEST_DRIZZLE_OPTIONS,
+} from '@app/core/constants/db.constants';
 
 @Global()
 @Module({})
@@ -23,7 +26,12 @@ export class NestDrizzleModule {
     return {
       module: NestDrizzleModule,
       providers: providers,
-      exports: [connectionFactory, DrizzleService],
+      exports: [
+        connectionFactory,
+        DrizzleService,
+        NEST_DRIZZLE_OPTIONS,
+        DRIZZLE_PROVIDER,
+      ],
     };
   }
 
@@ -42,7 +50,12 @@ export class NestDrizzleModule {
       module: NestDrizzleModule,
       imports: options.imports || [],
       providers: providers,
-      exports: [connectionFactory, DrizzleService],
+      exports: [
+        connectionFactory,
+        DrizzleService,
+        NEST_DRIZZLE_OPTIONS,
+        DRIZZLE_PROVIDER,
+      ],
     };
   }
 

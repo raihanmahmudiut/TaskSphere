@@ -4,7 +4,7 @@ import * as dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' }); // Or just .env
 
 export default {
-  schema: './src/db/schema/*', // Point to all your schema files
+  schema: './src/db/index.ts', // Point to all your schema files
   out: './drizzle', // Output directory for migrations
   driver: 'pg',
   dbCredentials: {
