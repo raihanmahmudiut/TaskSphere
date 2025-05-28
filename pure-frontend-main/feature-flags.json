@@ -1,4 +1,0 @@
-{
-    "LOGIN_ALLOWED": ["local", "staging", "production"],
-    "DISPUTE_ALLOWED": ["local", "staging", "production"]
-}

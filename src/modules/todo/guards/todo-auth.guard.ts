@@ -13,7 +13,6 @@ import { ROLES_KEY, RequiredRole } from './role.decorator';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DRIZZLE_PROVIDER } from '@app/core/constants/db.constants';
 
-// Use the schema type directly
 export type DrizzleClient = NodePgDatabase<typeof schema>;
 
 @Injectable()

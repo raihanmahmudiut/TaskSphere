@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
-import { NestDrizzleModule } from '@app/modules/drizzle/drizzle.module'; // Your Drizzle module
+import { NestDrizzleModule } from '@app/modules/drizzle/drizzle.module';
 
 @Module({
-  imports: [NestDrizzleModule], // Make Drizzle provider available
-  controllers: [UsersController], // We'll add this later if needed for user-specific endpoints
+  imports: [NestDrizzleModule],
+  controllers: [UsersController],
   providers: [UsersService],
-  exports: [UsersService], // Export UsersService for AuthModule
+  exports: [UsersService],
 })
 export class UsersModule {}
