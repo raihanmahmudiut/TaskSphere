@@ -1,0 +1,14 @@
+dist
+build
+
+node_modules
+
+src/**/types/**/*.d.ts
+
+src/**/*.spec.ts
+src/**/*.int-spec.ts
+src/**/*.e2e-spec.ts
+
+src/components/ui/*
+
+next.config.mjs

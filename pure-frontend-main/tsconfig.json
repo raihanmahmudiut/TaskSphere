@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@dayjs": ["./src/lib/dayjs.ts"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "src/common/types/global/*",
+    "src/common/types/*",
+    "src/types/*",
+    "src/lib/feature-flag/index.js",
+    "src/types/feature-flags.d.ts",
+    "scripts/typegen-ff.js"
+  ],
+  "exclude": ["node_modules"]
+}

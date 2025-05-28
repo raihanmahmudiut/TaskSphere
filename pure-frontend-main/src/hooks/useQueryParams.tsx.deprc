@@ -1,0 +1,104 @@
+import {
+  Options,
+  UseQueryStateOptions,
+  UseQueryStateReturn,
+  useQueryState,
+} from 'nuqs';
+
+//!Danger: Do Not Use. Just For learning reference
+/**
+ * !!Danger: DO NOT USE
+ */
+export function getQueryParams<
+  T extends Record<string, number | boolean | string | null | undefined>,
+>(
+  params: T,
+  options?: Partial<UseQueryStateOptions<T>>
+): {
+  [K in keyof T]: T[K];
+};
+export function getQueryParams<T extends string>(
+  ...params: T[]
+): Record<T, undefined>;
+export function getQueryParams(...params: any[]) {
+  const toReturn: any = {};
+
+  if (
+    params.length >= 1 &&
+    typeof params[0] === 'object' &&
+    !Array.isArray(params[0])
+  ) {
+    Object.keys(params[0]).map((key) => {
+      const [value] = useQueryState(key, {
+        defaultValue: params[0][key],
+        ...params[1],
+      });
+
+      toReturn[key] = value as string;
+    });
+
+    return toReturn;
+  } else {
+    params.map((param: any) => {
+      const [value] = useQueryState(param);
+
+      toReturn[param] = value as string;
+
+      return toReturn;
+    });
+  }
+
+  return toReturn;
+}
+
+type SetterName<Key extends string> = `set_${Key}`;
+
+/**
+ * !!Danger: DO NOT USE
+ *
+ */
+export function useQueryParams<
+  T extends Record<string, number | boolean | string | null | undefined>,
+>(
+  params: T,
+  options?: Options<T>
+): {
+  [K in keyof T]: T[K];
+} & {
+  [K in keyof T as SetterName<string & K>]: UseQueryStateReturn<T[K], T[K]>[1];
+};
+export function useQueryParams<T extends string>(
+  ...params: T[]
+): Record<T, undefined> &
+  Record<`set_${T}`, UseQueryStateReturn<string, undefined>[1]>;
+export function useQueryParams(...params: any[]) {
+  const toReturn: any = {};
+
+  if (
+    params.length >= 1 &&
+    typeof params[0] === 'object' &&
+    !Array.isArray(params[0])
+  ) {
+    Object.keys(params[0]).map((key) => {
+      const [value, setValue] = useQueryState(key, {
+        defaultValue: params[0][key],
+        ...params[1],
+      });
+
+      toReturn[key] = value as string;
+      toReturn[`set_${key}`] = setValue;
+    });
+
+    return toReturn;
+  } else {
+    params.map((param: any) => {
+      const [value, setValue] = useQueryState(param);
+
+      toReturn[param] = value as string;
+      toReturn[`set_${param}`] = setValue;
+      return toReturn;
+    });
+  }
+
+  return toReturn;
+}
