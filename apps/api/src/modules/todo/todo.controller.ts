@@ -22,6 +22,7 @@ import { Roles } from './guards/role.decorator';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { ReorderTasksDto } from './dto/reorder-tasks.dto';
+import { CreateDependencyDto } from './dto/create-dependency.dto';
 import { TodoAuthGuard } from './guards/todo-auth.guard';
 
 @ApiBearerAuth()
@@ -197,6 +198,47 @@ export class TodoController {
   ) {
     const user = req.user as any;
     return this.todoService.removeTask(taskId, user.uuid);
+  }
+
+  // --- Dependency Endpoints ---
+
+  @Get(':todoId/dependencies')
+  @UseGuards(TodoAuthGuard)
+  @Roles('OWNER', 'EDITOR', 'VIEWER')
+  @ApiOperation({ summary: 'Get all task dependencies for a todo app' })
+  getDependencies(@Param('todoId', ParseIntPipe) todoId: number) {
+    return this.todoService.getDependencies(todoId);
+  }
+
+  @Post(':todoId/dependencies')
+  @UseGuards(TodoAuthGuard)
+  @Roles('OWNER', 'EDITOR')
+  @ApiOperation({ summary: 'Create a task dependency' })
+  createDependency(
+    @Param('todoId', ParseIntPipe) todoId: number,
+    @Body() dto: CreateDependencyDto,
+    @Req() req: Request,
+  ) {
+    const user = req.user as any;
+    return this.todoService.createDependency(
+      todoId,
+      dto.sourceTaskId,
+      dto.targetTaskId,
+      user.uuid,
+    );
+  }
+
+  @Delete(':todoId/dependencies/:depId')
+  @UseGuards(TodoAuthGuard)
+  @Roles('OWNER', 'EDITOR')
+  @ApiOperation({ summary: 'Delete a task dependency' })
+  removeDependency(
+    @Param('todoId', ParseIntPipe) todoId: number,
+    @Param('depId', ParseIntPipe) depId: number,
+    @Req() req: Request,
+  ) {
+    const user = req.user as any;
+    return this.todoService.removeDependency(todoId, depId, user.uuid);
   }
 
   // --- Activity Endpoints ---

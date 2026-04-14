@@ -1,11 +1,12 @@
 import { Module, ValidationError, ValidationPipe } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { APP_FILTER, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { AllExceptionsFilter } from './core/filters';
 import { UsersModule } from './modules/users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { NestDrizzleModule } from './modules/drizzle/drizzle.module';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import * as schema from '@tasksphere/db';
 import { AuthModule } from './modules/auth/auth.module';
 import { TodoModule } from './modules/todo/todo.module';
@@ -15,6 +16,9 @@ import { WebsocketModule } from './modules/websocket/websocket.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env.local',
+    }),
+    ThrottlerModule.forRoot({
+      throttlers: [{ ttl: 60000, limit: 100 }],
     }),
     NestDrizzleModule.forRootAsync({
       imports: [ConfigModule],
@@ -40,6 +44,7 @@ import { WebsocketModule } from './modules/websocket/websocket.module';
   controllers: [AppController],
   providers: [
     AppService,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
     {
       provide: APP_PIPE,

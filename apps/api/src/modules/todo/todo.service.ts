@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  Inject,
+  BadRequestException,
+} from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as allSchema from '@tasksphere/db';
 import { and, eq, or, inArray, ilike, asc, desc, SQL } from 'drizzle-orm';
@@ -420,6 +425,121 @@ export class TodoService {
     this.websocketGateway.server
       .to(this.getRoomName(todoId))
       .emit('tasksReordered', { todoId });
+  }
+
+  // --- Dependency Methods ---
+
+  async getDependencies(todoId: number) {
+    return this.db
+      .select()
+      .from(allSchema.taskDependencies)
+      .where(eq(allSchema.taskDependencies.todoAppId, todoId));
+  }
+
+  async createDependency(
+    todoId: number,
+    sourceTaskId: number,
+    targetTaskId: number,
+    actorId?: string,
+  ) {
+    if (sourceTaskId === targetTaskId) {
+      throw new BadRequestException('A task cannot depend on itself.');
+    }
+
+    const hasCycle = await this.detectCycle(todoId, sourceTaskId, targetTaskId);
+    if (hasCycle) {
+      throw new BadRequestException(
+        'Adding this dependency would create a cycle.',
+      );
+    }
+
+    const [dep] = await this.db
+      .insert(allSchema.taskDependencies)
+      .values({ sourceTaskId, targetTaskId, todoAppId: todoId })
+      .returning();
+
+    this.websocketGateway.server
+      .to(this.getRoomName(todoId))
+      .emit('dependencyCreated', dep);
+
+    if (actorId) {
+      await this.logActivity(
+        todoId,
+        actorId,
+        'dependency.created',
+        'dependency',
+        String(dep.id),
+        { sourceTaskId, targetTaskId },
+      );
+    }
+    return dep;
+  }
+
+  async removeDependency(todoId: number, depId: number, actorId?: string) {
+    const deleted = await this.db
+      .delete(allSchema.taskDependencies)
+      .where(
+        and(
+          eq(allSchema.taskDependencies.id, depId),
+          eq(allSchema.taskDependencies.todoAppId, todoId),
+        ),
+      )
+      .returning();
+
+    if (deleted.length === 0) {
+      throw new NotFoundException(`Dependency with ID ${depId} not found`);
+    }
+
+    this.websocketGateway.server
+      .to(this.getRoomName(todoId))
+      .emit('dependencyDeleted', { id: depId, todoAppId: todoId });
+
+    if (actorId) {
+      await this.logActivity(
+        todoId,
+        actorId,
+        'dependency.deleted',
+        'dependency',
+        String(depId),
+      );
+    }
+    return { message: 'Dependency removed successfully.' };
+  }
+
+  private async detectCycle(
+    todoId: number,
+    sourceTaskId: number,
+    targetTaskId: number,
+  ): Promise<boolean> {
+    const allDeps = await this.db
+      .select()
+      .from(allSchema.taskDependencies)
+      .where(eq(allSchema.taskDependencies.todoAppId, todoId));
+
+    const adjacency = new Map<number, number[]>();
+    for (const dep of allDeps) {
+      const list = adjacency.get(dep.sourceTaskId) || [];
+      list.push(dep.targetTaskId);
+      adjacency.set(dep.sourceTaskId, list);
+    }
+
+    // Add the proposed edge
+    const existing = adjacency.get(sourceTaskId) || [];
+    existing.push(targetTaskId);
+    adjacency.set(sourceTaskId, existing);
+
+    // BFS from targetTaskId: if we can reach sourceTaskId, there's a cycle
+    const visited = new Set<number>();
+    const queue = [targetTaskId];
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      if (current === sourceTaskId) return true;
+      if (visited.has(current)) continue;
+      visited.add(current);
+      const neighbors = adjacency.get(current) || [];
+      queue.push(...neighbors);
+    }
+    return false;
   }
 
   // --- Activity Methods ---

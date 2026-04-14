@@ -15,8 +15,10 @@ import { RegisterDto } from './dto/register.dto';
 import { Request } from 'express';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('auth')
+@Throttle({ default: { ttl: 60000, limit: 10 } })
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

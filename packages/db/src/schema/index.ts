@@ -3,12 +3,14 @@ export { todoApps } from './todoApps';
 export { tasks } from './tasks';
 export { todoAppCollaborators } from './todoAppCollaborators';
 export { activities } from './activities';
+export { taskDependencies } from './taskDependencies';
 export {
   usersRelations,
   todoAppsRelations,
   tasksRelations,
   todoAppCollaboratorsRelations,
   activitiesRelations,
+  taskDependenciesRelations,
 } from './relations';
 export {
   taskStatusEnum,
