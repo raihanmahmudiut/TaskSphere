@@ -1,19 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { DRIZZLE_PROVIDER } from './core/constants/db.constants';
-import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import * as schema from '@tasksphere/db';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AppService {
-  constructor(
-    @Inject(DRIZZLE_PROVIDER) private conn: PostgresJsDatabase<typeof schema>,
-  ) {}
   getHello(): string {
     return 'Hello World!';
-  }
-
-  async getUser() {
-    console.log(this.conn);
-    return this.conn.select().from(schema.users);
   }
 }

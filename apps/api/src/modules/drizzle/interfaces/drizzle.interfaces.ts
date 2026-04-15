@@ -16,8 +16,10 @@ export interface NestDrizzleOptionsFactory {
   createNestDrizzleOptions(): Promise<NestDrizzleOptions> | NestDrizzleOptions;
 }
 
-export interface NestDrizzleAsyncOptions
-  extends Pick<ModuleMetadata, 'imports'> {
+export interface NestDrizzleAsyncOptions extends Pick<
+  ModuleMetadata,
+  'imports'
+> {
   inject?: any[];
   useExisting?: Type<NestDrizzleOptionsFactory>;
   useClass?: Type<NestDrizzleOptionsFactory>;

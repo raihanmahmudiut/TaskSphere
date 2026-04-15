@@ -17,6 +17,7 @@ export const tasks = pgTable('tasks', {
   status: taskStatusEnum('status').default('TODO').notNull(),
   priority: taskPriorityEnum('priority'),
   dueDate: date('due_date', { mode: 'date' }),
+  position: integer('position').default(0).notNull(),
   todoAppId: integer('todo_app_id')
     .notNull()
     .references(() => todoApps.id, { onDelete: 'cascade' }),

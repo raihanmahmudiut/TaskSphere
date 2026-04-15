@@ -2,11 +2,13 @@ export { users } from './users';
 export { todoApps } from './todoApps';
 export { tasks } from './tasks';
 export { todoAppCollaborators } from './todoAppCollaborators';
+export { activities } from './activities';
 export {
   usersRelations,
   todoAppsRelations,
   tasksRelations,
   todoAppCollaboratorsRelations,
+  activitiesRelations,
 } from './relations';
 export {
   taskStatusEnum,

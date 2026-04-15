@@ -75,6 +75,16 @@ export class UsersService {
     });
   }
 
+  async findByEmailSafe(
+    email: string,
+  ): Promise<Omit<User, 'hashedPassword'> | undefined> {
+    const user = await this.db.query.users.findFirst({
+      where: eq(allSchema.users.email, email.toLowerCase()),
+      columns: { hashedPassword: false },
+    });
+    return user as Omit<User, 'hashedPassword'> | undefined;
+  }
+
   async findById(
     userId: string,
   ): Promise<Omit<User, 'hashedPassword'> | undefined> {

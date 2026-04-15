@@ -1,27 +1,68 @@
 import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as allSchema from '@tasksphere/db';
-import { and, eq, or, inArray } from 'drizzle-orm';
+import { and, eq, or, inArray, ilike, asc, desc, SQL } from 'drizzle-orm';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
 import { CollaboratorRole } from '@tasksphere/db';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
-import { NEST_DRIZZLE_OPTIONS } from '@app/core/constants/db.constants';
+import { DRIZZLE_PROVIDER } from '@app/core/constants/db.constants';
 import { WebsocketGateway } from '../websocket/websocket.gateway';
 
-// Assuming your provider setup exports a client of this type
 export type DrizzleClient = NodePgDatabase<typeof allSchema>;
+
+export interface TaskFilterParams {
+  status?: string;
+  priority?: string;
+  search?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
 
 @Injectable()
 export class TodoService {
   constructor(
-    @Inject(NEST_DRIZZLE_OPTIONS) private readonly db: DrizzleClient,
+    @Inject(DRIZZLE_PROVIDER) private readonly db: DrizzleClient,
     private readonly websocketGateway: WebsocketGateway,
   ) {}
 
   private getRoomName(todoId: number): string {
     return `todo-app-${todoId}`;
+  }
+
+  private async logActivity(
+    todoAppId: number,
+    userId: string,
+    action: string,
+    entityType?: string,
+    entityId?: string,
+    metadata?: Record<string, any>,
+  ) {
+    const [activity] = await this.db
+      .insert(allSchema.activities)
+      .values({
+        todoAppId,
+        userId,
+        action,
+        entityType: entityType || null,
+        entityId: entityId ? String(entityId) : null,
+        metadata: metadata ? JSON.stringify(metadata) : null,
+      })
+      .returning();
+
+    const activityWithUser = await this.db.query.activities.findFirst({
+      where: eq(allSchema.activities.id, activity.id),
+      with: {
+        user: { columns: { uuid: true, name: true, email: true } },
+      },
+    });
+
+    this.websocketGateway.server
+      .to(this.getRoomName(todoAppId))
+      .emit('activityCreated', activityWithUser);
+
+    return activity;
   }
 
   // --- ToDo App Methods ---
@@ -35,32 +76,27 @@ export class TodoService {
   }
 
   async findAllForUser(userId: string) {
-    // Find apps the user is a collaborator on
     const collaborations = await this.db.query.todoAppCollaborators.findMany({
       where: eq(allSchema.todoAppCollaborators.userId, userId),
     });
 
     const collaboratedAppIds = collaborations.map((c) => c.todoAppId);
-
-    // Prepare a list of conditions for the OR query
     const whereConditions = [eq(allSchema.todoApps.ownerId, userId)];
 
     if (collaboratedAppIds.length > 0) {
       whereConditions.push(inArray(allSchema.todoApps.id, collaboratedAppIds));
     }
 
-    // Find apps the user owns OR is a collaborator on
     return this.db.query.todoApps.findMany({
       where: or(...whereConditions),
       with: {
-        owner: {
-          columns: {
-            uuid: true,
-            name: true,
-            email: true,
+        owner: { columns: { uuid: true, name: true, email: true } },
+        tasks: true,
+        collaborators: {
+          with: {
+            user: { columns: { uuid: true, name: true, email: true } },
           },
         },
-        tasks: true,
       },
     });
   }
@@ -69,15 +105,11 @@ export class TodoService {
     const todoApp = await this.db.query.todoApps.findFirst({
       where: eq(allSchema.todoApps.id, id),
       with: {
-        owner: {
-          columns: { uuid: true, name: true, email: true },
-        },
+        owner: { columns: { uuid: true, name: true, email: true } },
         tasks: true,
         collaborators: {
           with: {
-            user: {
-              columns: { uuid: true, name: true, email: true },
-            },
+            user: { columns: { uuid: true, name: true, email: true } },
           },
         },
       },
@@ -124,6 +156,7 @@ export class TodoService {
     todoId: number,
     userId: string,
     role: CollaboratorRole,
+    actorId?: string,
   ) {
     const newCollaborator = await this.db
       .insert(allSchema.todoAppCollaborators)
@@ -133,10 +166,21 @@ export class TodoService {
     this.websocketGateway.server
       .to(this.getRoomName(todoId))
       .emit('collaboratorAdded', newCollaborator[0]);
+
+    if (actorId) {
+      await this.logActivity(
+        todoId,
+        actorId,
+        'collaborator.added',
+        'collaborator',
+        userId,
+        { role },
+      );
+    }
     return newCollaborator[0];
   }
 
-  async removeCollaborator(todoId: number, userId: string) {
+  async removeCollaborator(todoId: number, userId: string, actorId?: string) {
     await this.db
       .delete(allSchema.todoAppCollaborators)
       .where(
@@ -149,10 +193,25 @@ export class TodoService {
     this.websocketGateway.server
       .to(this.getRoomName(todoId))
       .emit('collaboratorRemoved', { todoId, userId });
+
+    if (actorId) {
+      await this.logActivity(
+        todoId,
+        actorId,
+        'collaborator.removed',
+        'collaborator',
+        userId,
+      );
+    }
     return { message: 'Collaborator removed successfully.' };
   }
 
-  async assignRole(todoId: number, userId: string, role: CollaboratorRole) {
+  async assignRole(
+    todoId: number,
+    userId: string,
+    role: CollaboratorRole,
+    actorId?: string,
+  ) {
     const updated = await this.db
       .update(allSchema.todoAppCollaborators)
       .set({ role })
@@ -169,34 +228,116 @@ export class TodoService {
     this.websocketGateway.server
       .to(this.getRoomName(todoId))
       .emit('collaboratorUpdated', updated[0]);
+
+    if (actorId) {
+      await this.logActivity(
+        todoId,
+        actorId,
+        'collaborator.role_changed',
+        'collaborator',
+        userId,
+        { role },
+      );
+    }
     return updated[0];
   }
 
   // --- Task Methods ---
 
-  async createTask(todoId: number, createTaskDto: CreateTaskDto) {
+  async createTask(
+    todoId: number,
+    createTaskDto: CreateTaskDto,
+    actorId?: string,
+  ) {
+    const maxPositionResult = await this.db
+      .select({ maxPos: allSchema.tasks.position })
+      .from(allSchema.tasks)
+      .where(eq(allSchema.tasks.todoAppId, todoId))
+      .orderBy(desc(allSchema.tasks.position))
+      .limit(1);
+
+    const nextPosition =
+      maxPositionResult.length > 0 ? maxPositionResult[0].maxPos + 1 : 0;
+
     const newTask = await this.db
       .insert(allSchema.tasks)
-      .values({ ...createTaskDto, todoAppId: todoId })
+      .values({ ...createTaskDto, todoAppId: todoId, position: nextPosition })
       .returning();
     const createdTask = newTask[0];
 
     this.websocketGateway.server
       .to(this.getRoomName(todoId))
       .emit('taskCreated', createdTask);
+
+    if (actorId) {
+      await this.logActivity(
+        todoId,
+        actorId,
+        'task.created',
+        'task',
+        String(createdTask.id),
+        { title: createdTask.title },
+      );
+    }
     return createdTask;
   }
 
-  async findTasksForApp(todoId: number) {
-    return this.db.query.tasks.findMany({
-      where: eq(allSchema.tasks.todoAppId, todoId),
-    });
+  async findTasksForApp(todoId: number, filters?: TaskFilterParams) {
+    const conditions: SQL[] = [eq(allSchema.tasks.todoAppId, todoId)];
+
+    if (filters?.status) {
+      const statuses = filters.status.split(',') as allSchema.TaskStatus[];
+      conditions.push(inArray(allSchema.tasks.status, statuses));
+    }
+
+    if (filters?.priority) {
+      const priorities = filters.priority.split(
+        ',',
+      ) as allSchema.TaskPriority[];
+      conditions.push(inArray(allSchema.tasks.priority, priorities));
+    }
+
+    if (filters?.search) {
+      conditions.push(ilike(allSchema.tasks.title, `%${filters.search}%`));
+    }
+
+    const sortColumn = (() => {
+      switch (filters?.sortBy) {
+        case 'dueDate':
+          return allSchema.tasks.dueDate;
+        case 'priority':
+          return allSchema.tasks.priority;
+        case 'createdAt':
+          return allSchema.tasks.createdAt;
+        case 'title':
+          return allSchema.tasks.title;
+        default:
+          return allSchema.tasks.position;
+      }
+    })();
+
+    const sortDir =
+      filters?.sortOrder === 'desc' ? desc(sortColumn) : asc(sortColumn);
+
+    return this.db
+      .select()
+      .from(allSchema.tasks)
+      .where(and(...conditions))
+      .orderBy(sortDir, asc(allSchema.tasks.createdAt));
   }
 
-  async updateTask(taskId: number, updateTaskDto: UpdateTaskDto) {
+  async updateTask(
+    taskId: number,
+    updateTaskDto: UpdateTaskDto,
+    actorId?: string,
+  ) {
+    const existing = await this.db.query.tasks.findFirst({
+      where: eq(allSchema.tasks.id, taskId),
+    });
+
     const updated = await this.db
       .update(allSchema.tasks)
-      .set(updateTaskDto)
+      .set({ ...updateTaskDto, updatedAt: new Date() })
       .where(eq(allSchema.tasks.id, taskId))
       .returning();
     if (updated.length === 0)
@@ -206,10 +347,32 @@ export class TodoService {
     this.websocketGateway.server
       .to(this.getRoomName(updatedTask.todoAppId))
       .emit('taskUpdated', updatedTask);
+
+    if (actorId && existing) {
+      if (updateTaskDto.status === 'DONE' && existing.status !== 'DONE') {
+        await this.logActivity(
+          updatedTask.todoAppId,
+          actorId,
+          'task.completed',
+          'task',
+          String(taskId),
+          { title: updatedTask.title },
+        );
+      } else {
+        await this.logActivity(
+          updatedTask.todoAppId,
+          actorId,
+          'task.updated',
+          'task',
+          String(taskId),
+          { title: updatedTask.title },
+        );
+      }
+    }
     return updatedTask;
   }
 
-  async removeTask(taskId: number) {
+  async removeTask(taskId: number, actorId?: string) {
     const deleted = await this.db
       .delete(allSchema.tasks)
       .where(eq(allSchema.tasks.id, taskId))
@@ -224,6 +387,54 @@ export class TodoService {
         id: deletedTask.id,
         todoAppId: deletedTask.todoAppId,
       });
+
+    if (actorId) {
+      await this.logActivity(
+        deletedTask.todoAppId,
+        actorId,
+        'task.deleted',
+        'task',
+        String(taskId),
+        { title: deletedTask.title },
+      );
+    }
     return { message: `Task with ID ${taskId} deleted successfully.` };
+  }
+
+  async reorderTasks(
+    todoId: number,
+    taskPositions: { id: number; position: number }[],
+  ) {
+    for (const tp of taskPositions) {
+      await this.db
+        .update(allSchema.tasks)
+        .set({ position: tp.position, updatedAt: new Date() })
+        .where(
+          and(
+            eq(allSchema.tasks.id, tp.id),
+            eq(allSchema.tasks.todoAppId, todoId),
+          ),
+        );
+    }
+
+    this.websocketGateway.server
+      .to(this.getRoomName(todoId))
+      .emit('tasksReordered', { todoId });
+  }
+
+  // --- Activity Methods ---
+
+  async getActivities(todoId: number, page = 1, limit = 20) {
+    const offset = (page - 1) * limit;
+    const items = await this.db.query.activities.findMany({
+      where: eq(allSchema.activities.todoAppId, todoId),
+      with: {
+        user: { columns: { uuid: true, name: true, email: true } },
+      },
+      orderBy: [desc(allSchema.activities.createdAt)],
+      limit,
+      offset,
+    });
+    return { items, page, limit };
   }
 }

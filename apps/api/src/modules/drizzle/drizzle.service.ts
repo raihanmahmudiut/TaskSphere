@@ -42,7 +42,10 @@ export class DrizzleService implements IDrizzleService {
         this.logger.error('Database connection error', error);
         throw error; // Propagate the error
       }
-      this._drizzle = drizzlePgJs(client, this._NestDrizzleOptions.options as any);
+      this._drizzle = drizzlePgJs(
+        client,
+        this._NestDrizzleOptions.options as any,
+      );
     }
     return this._drizzle;
   }

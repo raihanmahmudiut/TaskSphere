@@ -6,6 +6,8 @@ import {
   Req,
   UseGuards,
   Body,
+  Query,
+  NotFoundException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -15,6 +17,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -31,6 +34,19 @@ type AuthUser = {
 @ApiBearerAuth()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @ApiOperation({ summary: 'Search for a user by email' })
+  @ApiQuery({ name: 'email', required: true })
+  @ApiResponse({ status: 200, description: 'User found.' })
+  @ApiResponse({ status: 404, description: 'User not found.' })
+  @UseGuards(JwtAuthGuard)
+  @Get('search')
+  async searchByEmail(@Query('email') email: string) {
+    if (!email) throw new NotFoundException('Email query param required');
+    const user = await this.usersService.findByEmailSafe(email);
+    if (!user) throw new NotFoundException('No user found with that email');
+    return user;
+  }
 
   @ApiOperation({ summary: 'Get user profile' })
   @ApiResponse({ status: 200, description: 'Return user profile.' })

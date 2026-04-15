@@ -1,10 +1,4 @@
-import {
-  pgTable,
-  serial,
-  varchar,
-  timestamp,
-  uuid,
-} from 'drizzle-orm/pg-core';
+import { pgTable, serial, varchar, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { users } from './users';
 
 export const todoApps = pgTable('todo_apps', {

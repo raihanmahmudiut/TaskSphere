@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv';
 
-dotenv.config({ path: '../../.env' });
+dotenv.config({ path: '../../.env', override: false });
 
 export default {
   schema: '../../packages/db/src/schema/index.ts',
