@@ -8,6 +8,7 @@ import Settings from './pages/Settings';
 import ProtectedRoute from './components/ProtectedRoute';
 import GuestRoute from './components/GuestRoute';
 import AuthProvider from './components/AuthProvider';
+import ErrorBoundary from './components/ErrorBoundary';
 import Toaster from './components/Toaster';
 import CommandPalette from './components/CommandPalette';
 import { useUIStore } from './stores/uiStore';
@@ -31,6 +32,7 @@ function GlobalKeyboardListener() {
 
 function App() {
   return (
+    <ErrorBoundary>
     <BrowserRouter>
       <AuthProvider>
         <GlobalKeyboardListener />
@@ -50,6 +52,7 @@ function App() {
         <Toaster />
       </AuthProvider>
     </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

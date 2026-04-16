@@ -36,8 +36,14 @@ import {
 
 import FilterBar from '@/components/FilterBar';
 import KanbanBoard from '@/components/KanbanBoard';
+import WorkflowView from '@/components/workflow/WorkflowView';
 import TaskDetailPanel from '@/components/TaskDetailPanel';
 import ActivityFeed from '@/components/ActivityFeed';
+import {
+  useDependencies,
+  useCreateDependency,
+  useDeleteDependency,
+} from '@/hooks/useDependencies';
 
 import {
   ArrowLeft,
@@ -46,6 +52,7 @@ import {
   Users,
   LayoutList,
   Kanban,
+  GitBranch,
   Loader2,
   Crown,
   UserPlus,
@@ -54,6 +61,7 @@ import {
   Activity,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function TodoApp() {
   const { id } = useParams<{ id: string }>();
@@ -79,6 +87,9 @@ export default function TodoApp() {
   const addCollaborator = useAddCollaborator();
   const updateRole = useUpdateCollaboratorRole();
   const removeCollaborator = useRemoveCollaborator();
+  const { data: dependencies = [] } = useDependencies(id!);
+  const createDep = useCreateDependency();
+  const deleteDep = useDeleteDependency();
 
   const [createOpen, setCreateOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
@@ -119,6 +130,11 @@ export default function TodoApp() {
       socket.on(e, () => {
         queryClient.invalidateQueries({ queryKey: ['tasks', id] });
         queryClient.invalidateQueries({ queryKey: ['todoApp', id] });
+      }),
+    );
+    ['dependencyCreated', 'dependencyDeleted'].forEach((e) =>
+      socket.on(e, () => {
+        queryClient.invalidateQueries({ queryKey: ['dependencies', id] });
       }),
     );
     socket.on('activityCreated', () => {
@@ -245,6 +261,17 @@ export default function TodoApp() {
               >
                 <Kanban className="h-3.5 w-3.5" />
               </button>
+              <button
+                className={cn(
+                  'px-2.5 py-1.5 text-xs font-medium transition-colors',
+                  view === 'workflow'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-muted',
+                )}
+                onClick={() => setView('workflow')}
+              >
+                <GitBranch className="h-3.5 w-3.5" />
+              </button>
             </div>
             <div className="flex-1">
               <FilterBar
@@ -258,9 +285,14 @@ export default function TodoApp() {
 
           {/* Tasks */}
           {tasksLoading ? (
-            <div className="flex items-center justify-center py-16 text-muted-foreground">
-              <Loader2 className="animate-spin mr-2 h-5 w-5" />
-              Loading tasks...
+            <div className="space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3 px-3 py-2.5">
+                  <Skeleton className="h-4 w-4 rounded" />
+                  <Skeleton className="h-4 flex-1" />
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                </div>
+              ))}
             </div>
           ) : !tasks || tasks.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -276,6 +308,23 @@ export default function TodoApp() {
                 </Button>
               )}
             </div>
+          ) : view === 'workflow' ? (
+            <WorkflowView
+              tasks={tasks}
+              dependencies={dependencies}
+              onNodeClick={(taskId) => setSelectedTask(String(taskId))}
+              onConnect={(src, tgt) =>
+                createDep.mutate({
+                  todoId: id!,
+                  sourceTaskId: src,
+                  targetTaskId: tgt,
+                })
+              }
+              onDeleteEdge={(depId) =>
+                deleteDep.mutate({ todoId: id!, depId })
+              }
+              canEdit={canEdit}
+            />
           ) : view === 'kanban' ? (
             <KanbanBoard
               tasks={tasks}
