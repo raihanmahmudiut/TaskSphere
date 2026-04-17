@@ -5,7 +5,7 @@ export const getTodoApps = async () => {
   return response.data;
 };
 
-export const createTodoApp = async (data: { title: string; description?: string }) => {
+export const createTodoApp = async (data: { name: string }) => {
   const response = await apiClient.post('/todo', data);
   return response.data;
 };

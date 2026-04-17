@@ -1,69 +1,300 @@
+import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTodoApps, useCreateTodoApp } from '../hooks/useTodo';
+import { useProfile, useLogout } from '../hooks/useAuth';
+import { useUIStore } from '@/stores/uiStore';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
+import {
+  Plus,
+  LogOut,
+  LayoutDashboard,
+  Users,
+  Menu,
+  X,
+  ListTodo,
+  Loader2,
+  Settings,
+  Command,
+} from 'lucide-react';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { data: todoApps, isLoading } = useTodoApps();
+  const { data: profile } = useProfile();
   const createTodoApp = useCreateTodoApp();
+  const handleLogout = useLogout();
+  const { sidebarOpen, setSidebar, setCommandPalette } = useUIStore();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [newAppName, setNewAppName] = useState('');
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
+  const handleCreateApp = (e: FormEvent) => {
+    e.preventDefault();
+    if (!newAppName.trim()) return;
+    createTodoApp.mutate(
+      { name: newAppName.trim() },
+      {
+        onSuccess: () => {
+          setNewAppName('');
+          setCreateOpen(false);
+        },
+      },
+    );
   };
 
-  const handleCreateApp = () => {
-    const title = prompt('Enter a title for your new Todo App:');
-    if (title) {
-      createTodoApp.mutate({ title, description: 'A new awesome list' });
-    }
-  };
+  const initials = profile?.email
+    ? profile.email.substring(0, 2).toUpperCase()
+    : '??';
 
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
-      {/* Sidebar */}
-      <aside className="glass-panel" style={{ width: '280px', borderTop: 'none', borderBottom: 'none', borderLeft: 'none', borderRadius: 0, padding: '2rem', display: 'flex', flexDirection: 'column' }}>
-        <h2 className="title" style={{ fontSize: '1.5rem', marginBottom: '2rem' }}>TaskSphere</h2>
-        <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <button className="btn" style={{ justifyContent: 'flex-start', background: 'var(--bg-surface-elevated)', color: 'var(--text-primary)' }}>My Todos</button>
-          <button className="btn" style={{ justifyContent: 'flex-start', background: 'transparent', color: 'var(--text-muted)' }}>Shared with me</button>
+    <div className="flex h-screen w-screen overflow-hidden bg-background">
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+          onClick={() => setSidebar(false)}
+        />
+      )}
+
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-border bg-sidebar p-4 transition-transform duration-200 md:static md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+      >
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-lg font-bold tracking-tight">TaskSphere</h1>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setSidebar(false)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <nav className="flex flex-1 flex-col gap-1">
+          <Button
+            variant="secondary"
+            className="justify-start gap-2"
+            onClick={() => setSidebar(false)}
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            My Todos
+          </Button>
+          <Button
+            variant="ghost"
+            className="justify-start gap-2 text-muted-foreground"
+            onClick={() => {
+              setCommandPalette(true);
+              setSidebar(false);
+            }}
+          >
+            <Command className="h-4 w-4" />
+            Search
+            <kbd className="ml-auto text-[0.6rem] border border-border rounded px-1 text-muted-foreground">
+              ⌘K
+            </kbd>
+          </Button>
         </nav>
-        <button onClick={handleLogout} className="btn" style={{ background: 'transparent', color: 'var(--danger)', border: '1px solid var(--danger)' }}>Logout</button>
+
+        <div className="border-t border-border pt-4 mt-4 space-y-1">
+          <div className="flex items-center gap-3 mb-2 px-1">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <span className="truncate text-sm text-muted-foreground">
+              {profile?.email}
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-2 text-muted-foreground"
+            onClick={() => navigate('/settings')}
+          >
+            <Settings className="h-4 w-4" />
+            Settings
+          </Button>
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+            onClick={handleLogout}
+          >
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
+        </div>
       </aside>
 
-      {/* Main Content */}
-      <main style={{ flex: 1, padding: '3rem', overflowY: 'auto' }}>
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
-          <h1 style={{ fontSize: '2rem', fontWeight: 600 }}>My Todos</h1>
-          <button className="btn btn-primary" onClick={handleCreateApp}>+ New App</button>
+      <main className="flex-1 overflow-y-auto">
+        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-background/80 px-4 py-3 backdrop-blur-lg md:px-6">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={() => setSidebar(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+            <h2 className="text-lg font-semibold">My Todos</h2>
+          </div>
+          <Button
+            onClick={() => setCreateOpen(true)}
+            size="sm"
+            className="gap-1.5"
+          >
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">New App</span>
+          </Button>
         </header>
 
-        {isLoading ? (
-          <p style={{ color: 'var(--text-muted)' }}>Loading your apps...</p>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
-            {todoApps?.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)' }}>You haven't created any Todo apps yet.</p>
-            ) : (
-              todoApps?.map((app: any) => (
-                <div 
-                  key={app.id} 
-                  className="glass-panel" 
-                  onClick={() => navigate(`/todo/${app.id}`)}
-                  style={{ padding: '1.5rem', cursor: 'pointer', transition: 'transform var(--transition-fast)' }} 
-                  onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'} 
-                  onMouseLeave={(e) => e.currentTarget.style.transform = 'none'}
-                >
-                  <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' }}>{app.title}</h3>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>{app.description}</p>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)', borderRadius: '1rem' }}>Active</span>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        )}
+        <div className="p-4 md:p-6">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20 text-muted-foreground">
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Loading...
+            </div>
+          ) : todoApps?.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
+                <ListTodo className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-medium">No todo apps yet</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Create your first app to get started.
+              </p>
+              <Button
+                onClick={() => setCreateOpen(true)}
+                className="mt-4 gap-1.5"
+              >
+                <Plus className="h-4 w-4" />
+                Create App
+              </Button>
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {todoApps?.map((app: any) => {
+                const isMine = profile && profile.uuid === app.ownerId;
+                const taskCount = app.tasks?.length || 0;
+                const doneCount =
+                  app.tasks?.filter((t: any) => t.status === 'DONE').length ||
+                  0;
+                return (
+                  <Card
+                    key={app.id}
+                    className="group cursor-pointer border-border/50 transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
+                    onClick={() => navigate(`/todo/${app.id}`)}
+                  >
+                    <CardContent className="p-5">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="truncate font-semibold group-hover:text-primary transition-colors">
+                            {app.name}
+                          </h3>
+                          <p className="mt-1 text-sm text-muted-foreground">
+                            {taskCount} {taskCount === 1 ? 'task' : 'tasks'}
+                            {taskCount > 0 && (
+                              <span className="ml-1 text-success">
+                                · {doneCount} done
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                        <Badge
+                          variant={isMine ? 'default' : 'secondary'}
+                          className="shrink-0 text-[0.65rem]"
+                        >
+                          {isMine ? 'Owner' : 'Shared'}
+                        </Badge>
+                      </div>
+                      {taskCount > 0 && (
+                        <div className="mt-4">
+                          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                            <div
+                              className="h-full rounded-full bg-primary transition-all"
+                              style={{
+                                width: `${(doneCount / taskCount) * 100}%`,
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                      {app.collaborators?.length > 0 && (
+                        <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Users className="h-3 w-3" />
+                          {app.collaborators.length + 1} people
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </main>
+
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent>
+          <DialogClose onClick={() => setCreateOpen(false)} />
+          <DialogHeader>
+            <DialogTitle>Create new app</DialogTitle>
+            <DialogDescription>
+              Give your todo app a name to get started.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleCreateApp}>
+            <div className="space-y-2">
+              <Label htmlFor="app-name">Name</Label>
+              <Input
+                id="app-name"
+                placeholder="e.g. Weekly groceries, Sprint tasks..."
+                value={newAppName}
+                onChange={(e) => setNewAppName(e.target.value)}
+                autoFocus
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setCreateOpen(false);
+                  setNewAppName('');
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={!newAppName.trim() || createTodoApp.isPending}
+              >
+                {createTodoApp.isPending ? (
+                  <>
+                    <Loader2 className="animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  'Create'
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
