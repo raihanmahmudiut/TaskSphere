@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import * as allSchema from '@app/db/index';
+import * as allSchema from '@tasksphere/db';
 import { and, eq, or, inArray } from 'drizzle-orm';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
-import { CollaboratorRole } from '@tasksphere/shared';
+import { CollaboratorRole } from '@tasksphere/db';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { NEST_DRIZZLE_OPTIONS } from '@app/core/constants/db.constants';

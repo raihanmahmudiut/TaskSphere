@@ -1,0 +1,11 @@
+{
+  "name": "@tasksphere/db",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "dependencies": {
+    "drizzle-orm": "^0.45.2",
+    "pg": "^8.11.3",
+    "postgres": "^3.4.3"
+  }
+}

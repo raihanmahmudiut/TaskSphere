@@ -9,7 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { eq } from 'drizzle-orm';
 import { DRIZZLE_PROVIDER } from '@app/core/constants/db.constants';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import * as allSchema from '@app/db/index';
+import * as allSchema from '@tasksphere/db';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 

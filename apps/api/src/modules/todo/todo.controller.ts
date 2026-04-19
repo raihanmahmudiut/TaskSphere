@@ -14,7 +14,7 @@ import { TodoService } from './todo.service';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { CollaboratorRole } from '@tasksphere/shared';
+import { CollaboratorRole } from '@tasksphere/db';
 import { JwtAuthGuard } from '@app/modules/auth/guards/jwt-auth.guard';
 import { Request } from 'express';
 import { Roles } from './guards/role.decorator';

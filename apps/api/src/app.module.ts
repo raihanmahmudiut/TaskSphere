@@ -6,7 +6,7 @@ import { AllExceptionsFilter } from './core/filters';
 import { UsersModule } from './modules/users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { NestDrizzleModule } from './modules/drizzle/drizzle.module';
-import * as schema from '../src/db/index';
+import * as schema from '@tasksphere/db';
 import { AuthModule } from './modules/auth/auth.module';
 import { TodoModule } from './modules/todo/todo.module';
 import { WebsocketModule } from './modules/websocket/websocket.module';

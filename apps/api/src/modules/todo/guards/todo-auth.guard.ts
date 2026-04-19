@@ -8,7 +8,8 @@ import {
 import { Reflector } from '@nestjs/core';
 import { Inject } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
-import { schema, todoApps } from '@app/db/index';
+import * as schema from '@tasksphere/db';
+import { todoApps } from '@tasksphere/db';
 import { ROLES_KEY, RequiredRole } from './role.decorator';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DRIZZLE_PROVIDER } from '@app/core/constants/db.constants';

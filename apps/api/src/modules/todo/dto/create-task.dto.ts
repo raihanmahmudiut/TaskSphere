@@ -6,8 +6,12 @@ import {
   IsEnum,
   IsDateString,
 } from 'class-validator';
-import { TaskStatus, TaskPriority } from '@tasksphere/shared';
-import { taskPriorityEnum, taskStatusEnum } from '@app/db';
+import {
+  TaskStatus,
+  TaskPriority,
+  taskPriorityEnum,
+  taskStatusEnum,
+} from '@tasksphere/db';
 
 export class CreateTaskDto {
   @ApiProperty({

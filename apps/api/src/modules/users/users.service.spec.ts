@@ -6,7 +6,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { DRIZZLE_PROVIDER } from '@app/core/constants/db.constants';
-import * as allSchema from '@app/db/index';
+import * as allSchema from '@tasksphere/db';
 
 describe('UsersService', () => {
   let service: UsersService;

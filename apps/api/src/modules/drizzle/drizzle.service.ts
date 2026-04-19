@@ -15,7 +15,7 @@ interface IDrizzleService {
 
 @Injectable()
 export class DrizzleService implements IDrizzleService {
-  private _drizzle: PostgresJsDatabase<Record<string, unknown>>;
+  private _drizzle: PostgresJsDatabase<any>;
   constructor(
     @Inject(NEST_DRIZZLE_OPTIONS)
     private _NestDrizzleOptions: NestDrizzleOptions,
@@ -31,7 +31,7 @@ export class DrizzleService implements IDrizzleService {
     );
   }
   async getDrizzle() {
-    let client: postgres.Sql<Record<string, never>>;
+    let client: postgres.Sql;
 
     if (!this._drizzle) {
       client = postgres(this._NestDrizzleOptions.url);
@@ -42,7 +42,7 @@ export class DrizzleService implements IDrizzleService {
         this.logger.error('Database connection error', error);
         throw error; // Propagate the error
       }
-      this._drizzle = drizzlePgJs(client, this._NestDrizzleOptions.options);
+      this._drizzle = drizzlePgJs(client, this._NestDrizzleOptions.options as any);
     }
     return this._drizzle;
   }

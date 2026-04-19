@@ -1,2 +1,0 @@
-export declare const NEST_DRIZZLE_OPTIONS = "NEST_DRIZZLE_OPTIONS";
-export declare const DRIZZLE_PROVIDER = "DRIZZLE_PROVIDER";

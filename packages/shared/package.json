@@ -4,6 +4,7 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "dependencies": {
-    "drizzle-orm": "^0.29.1"
+    "@tasksphere/db": "workspace:*",
+    "drizzle-orm": "^0.45.2"
   }
 }

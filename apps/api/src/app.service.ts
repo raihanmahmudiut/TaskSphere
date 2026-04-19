@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { DRIZZLE_PROVIDER } from './core/constants/db.constants';
 import { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import schema from '../src/db/index';
+import * as schema from '@tasksphere/db';
 
 @Injectable()
 export class AppService {

@@ -19,7 +19,9 @@
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "@app/*": ["src/*"],
-      "@core/*": ["core/*"]
+      "@core/*": ["core/*"],
+      "@tasksphere/db": ["../../packages/db/src/index.ts"],
+      "@tasksphere/db/*": ["../../packages/db/src/*"]
     }
   }
 }
