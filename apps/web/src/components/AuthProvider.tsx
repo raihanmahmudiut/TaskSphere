@@ -4,7 +4,7 @@ import { useUIStore } from '@/stores/uiStore';
 import { useProfile } from '@/hooks/useAuth';
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
-  const { hydrate, isHydrated, isAuthenticated } = useAuthStore();
+  const { hydrate, isHydrated } = useAuthStore();
   const theme = useUIStore((s) => s.theme);
 
   useEffect(() => {
@@ -19,7 +19,6 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 export function ProfileLoader({ children }: { children: ReactNode }) {
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   useProfile();
   return <>{children}</>;
 }

@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import {
   Search,
   LayoutDashboard,
-  Plus,
   Settings,
   LogOut,
   Sun,

@@ -30,7 +30,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
@@ -47,8 +46,6 @@ import {
   Users,
   LayoutList,
   Kanban,
-  ChevronDown,
-  ChevronRight,
   Loader2,
   Crown,
   UserPlus,
@@ -57,7 +54,6 @@ import {
   Activity,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useUIStore } from '@/stores/uiStore';
 
 export default function TodoApp() {
   const { id } = useParams<{ id: string }>();
@@ -65,8 +61,6 @@ export default function TodoApp() {
   const queryClient = useQueryClient();
   const { data: todoApp } = useTodoApp(id!);
   const { data: profile } = useProfile();
-  const addToast = useUIStore((s) => s.addToast);
-
   const {
     filters,
     view,
@@ -89,9 +83,6 @@ export default function TodoApp() {
   const [createOpen, setCreateOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [collabOpen, setCollabOpen] = useState(false);
-  const [collabEmail, setCollabEmail] = useState('');
-  const [collabRole, setCollabRole] = useState<'VIEWER' | 'EDITOR'>('EDITOR');
-  const [collabError, setCollabError] = useState('');
   const [activityOpen, setActivityOpen] = useState(false);
 
   const isOwner = profile && todoApp && profile.uuid === todoApp.ownerId;
@@ -154,33 +145,6 @@ export default function TodoApp() {
         },
       },
     );
-  };
-
-  const handleAddCollaborator = async (e: FormEvent) => {
-    e.preventDefault();
-    setCollabError('');
-    try {
-      const user = await searchUserByEmail(collabEmail.trim());
-      if (!user) {
-        setCollabError('User not found.');
-        return;
-      }
-      if (user.uuid === todoApp?.ownerId) {
-        setCollabError('Cannot add the owner as a collaborator.');
-        return;
-      }
-      addCollaborator.mutate(
-        { todoId: id!, userId: user.uuid, role: collabRole },
-        {
-          onSuccess: () => {
-            setCollabEmail('');
-            setCollabOpen(false);
-          },
-        },
-      );
-    } catch {
-      setCollabError('User not found.');
-    }
   };
 
   const statusColors: Record<string, string> = {
