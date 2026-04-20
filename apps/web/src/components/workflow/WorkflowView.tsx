@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useEffect } from 'react';
 import {
   ReactFlow,
   Background,
@@ -6,6 +6,7 @@ import {
   MiniMap,
   useNodesState,
   useEdgesState,
+  addEdge,
   type Node,
   type Edge,
   type Connection,
@@ -18,6 +19,7 @@ import TaskEdge from './TaskEdge';
 import { getLayoutedElements } from './useLayout';
 import type { TaskDependency } from '@/api/dependencies';
 import type { TaskNodeData } from './TaskNode';
+import { useBlockedTasks } from '@/hooks/useBlockedTasks';
 import { Button } from '@/components/ui/button';
 import { LayoutGrid } from 'lucide-react';
 
@@ -49,18 +51,25 @@ export default function WorkflowView({
     return map;
   }, [dependencies]);
 
-  const { initialNodes, initialEdges } = useMemo(() => {
-    const rawNodes: Node[] = tasks.map((t) => ({
-      id: String(t.id),
-      type: 'task',
-      position: { x: 0, y: 0 },
-      data: {
-        label: t.title,
-        status: t.status,
-        priority: t.priority,
-        taskId: t.id,
-      } satisfies TaskNodeData,
-    }));
+  const blockedMap = useBlockedTasks(tasks, dependencies);
+
+  const { layoutedNodes, layoutedEdges } = useMemo(() => {
+    const rawNodes: Node[] = tasks.map((t) => {
+      const blocked = blockedMap.get(t.id);
+      return {
+        id: String(t.id),
+        type: 'task',
+        position: { x: 0, y: 0 },
+        data: {
+          label: t.title,
+          status: t.status,
+          priority: t.priority,
+          taskId: t.id,
+          isBlocked: blocked?.isBlocked ?? false,
+          blockedByTitles: blocked?.blockedByTitles ?? [],
+        } satisfies TaskNodeData,
+      };
+    });
 
     const rawEdges: Edge[] = dependencies.map((d) => ({
       id: `dep-${d.sourceTaskId}-${d.targetTaskId}`,
@@ -72,24 +81,35 @@ export default function WorkflowView({
     }));
 
     const { nodes, edges } = getLayoutedElements(rawNodes, rawEdges);
-    return { initialNodes: nodes, initialEdges: edges };
-  }, [tasks, dependencies]);
+    return { layoutedNodes: nodes, layoutedEdges: edges };
+  }, [tasks, dependencies, blockedMap]);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges);
 
-  // Sync when tasks/deps change
-  useMemo(() => {
-    setNodes(initialNodes);
-    setEdges(initialEdges);
-  }, [initialNodes, initialEdges, setNodes, setEdges]);
+  useEffect(() => {
+    setNodes(layoutedNodes);
+    setEdges(layoutedEdges);
+  }, [layoutedNodes, layoutedEdges, setNodes, setEdges]);
 
   const handleConnect = useCallback(
     (connection: Connection) => {
       if (!canEdit || !connection.source || !connection.target) return;
+      if (connection.source === connection.target) return;
+
+      const optimisticEdge: Edge = {
+        id: `dep-${connection.source}-${connection.target}`,
+        source: connection.source,
+        target: connection.target,
+        type: 'dependency',
+        animated: true,
+        style: { stroke: 'hsl(var(--primary))', strokeWidth: 2, opacity: 0.5 },
+      };
+      setEdges((prev) => addEdge(optimisticEdge, prev));
+
       onConnect(Number(connection.source), Number(connection.target));
     },
-    [canEdit, onConnect],
+    [canEdit, onConnect, setEdges],
   );
 
   const handleDeleteEdge = useCallback(
@@ -109,12 +129,9 @@ export default function WorkflowView({
   );
 
   const onAutoLayout = useCallback(() => {
-    const { nodes: layouted, edges: layoutedEdges } = getLayoutedElements(
-      nodes,
-      edges,
-    );
-    setNodes([...layouted]);
-    setEdges([...layoutedEdges]);
+    const { nodes: laid, edges: laidEdges } = getLayoutedElements(nodes, edges);
+    setNodes([...laid]);
+    setEdges([...laidEdges]);
   }, [nodes, edges, setNodes, setEdges]);
 
   const edgesWithDeleteHandler = useMemo(
@@ -127,7 +144,7 @@ export default function WorkflowView({
   );
 
   return (
-    <div className="h-[calc(100vh-14rem)] rounded-lg border bg-card">
+    <div className="relative h-[calc(100vh-14rem)] rounded-lg border bg-card workflow-canvas">
       <ReactFlow
         nodes={nodes}
         edges={edgesWithDeleteHandler}
@@ -138,6 +155,7 @@ export default function WorkflowView({
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
+        
         proOptions={{ hideAttribution: true }}
         className="bg-background"
       >

@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { Lock } from 'lucide-react';
 
 const statusConfig: Record<string, { label: string; color: string }> = {
   TODO: { label: 'Todo', color: 'bg-muted text-muted-foreground' },
@@ -20,6 +21,8 @@ export type TaskNodeData = {
   status: string;
   priority: string | null;
   taskId: number;
+  isBlocked?: boolean;
+  blockedByTitles?: string[];
 };
 
 function TaskNodeComponent({ data }: NodeProps) {
@@ -29,8 +32,9 @@ function TaskNodeComponent({ data }: NodeProps) {
     ? priorityConfig[nodeData.priority]
     : null;
 
-  const borderColor =
-    nodeData.status === 'DONE'
+  const borderColor = nodeData.isBlocked
+    ? 'border-destructive/40 border-dashed'
+    : nodeData.status === 'DONE'
       ? 'border-green-500/40'
       : nodeData.status === 'IN_PROGRESS'
         ? 'border-primary/40'
@@ -41,19 +45,33 @@ function TaskNodeComponent({ data }: NodeProps) {
       <Handle type="target" position={Position.Top} className="!w-2 !h-2" />
       <div
         className={cn(
-          'rounded-lg border-2 bg-card px-4 py-3 shadow-sm min-w-[160px] max-w-[220px]',
+          'rounded-lg border-2 bg-card px-4 py-3 shadow-sm min-w-[160px] max-w-[220px] group relative',
           borderColor,
+          nodeData.isBlocked && 'opacity-75',
         )}
+        title={
+          nodeData.isBlocked
+            ? `Blocked by: ${nodeData.blockedByTitles?.join(', ')}`
+            : undefined
+        }
       >
         <div className="flex items-center gap-2 mb-1.5">
-          {priority && (
+          {nodeData.isBlocked && (
+            <Lock className="w-3 h-3 text-destructive shrink-0" />
+          )}
+          {priority && !nodeData.isBlocked && (
             <span className={cn('w-2 h-2 rounded-full shrink-0', priority.dot)} />
           )}
           <span className="text-sm font-medium truncate">{nodeData.label}</span>
         </div>
-        <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0', status.color)}>
-          {status.label}
-        </Badge>
+        <div className="flex items-center gap-1.5">
+          <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0', status.color)}>
+            {status.label}
+          </Badge>
+          {nodeData.isBlocked && (
+            <span className="text-[9px] text-destructive">Blocked</span>
+          )}
+        </div>
       </div>
       <Handle type="source" position={Position.Bottom} className="!w-2 !h-2" />
     </>

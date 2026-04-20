@@ -98,3 +98,20 @@ html:not(.dark) {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 }
+
+.workflow-canvas .react-flow__handle {
+  width: 10px;
+  height: 10px;
+  background: hsl(var(--primary));
+  border: 2px solid hsl(var(--background));
+  opacity: 0;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.workflow-canvas .react-flow__node:hover .react-flow__handle,
+.workflow-canvas .react-flow__handle:hover {
+  opacity: 1;
+  transform: scale(1.3);
+}
+.workflow-canvas .react-flow__handle.connecting {
+  opacity: 1;
+}

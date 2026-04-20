@@ -1,13 +1,15 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Badge } from '@/components/ui/badge';
-import { Calendar } from 'lucide-react';
+import { Calendar, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { BlockedInfo } from '@/hooks/useBlockedTasks';
 
 interface KanbanCardProps {
   task: any;
   onClick?: () => void;
   isOverlay?: boolean;
+  blocked?: BlockedInfo;
 }
 
 const priorityColors: Record<string, string> = {
@@ -20,6 +22,7 @@ export default function KanbanCard({
   task,
   onClick,
   isOverlay,
+  blocked,
 }: KanbanCardProps) {
   const {
     attributes,
@@ -48,16 +51,27 @@ export default function KanbanCard({
         'rounded-lg border border-border bg-card p-3 cursor-pointer hover:border-primary/30 transition-all text-sm',
         isDragging && 'opacity-30',
         isOverlay && 'shadow-xl border-primary/50 rotate-2',
+        blocked?.isBlocked && 'border-dashed border-destructive/30 opacity-75',
       )}
     >
-      <p
-        className={cn(
-          'font-medium leading-snug',
-          task.status === 'DONE' && 'line-through text-muted-foreground',
+      <div className="flex items-start gap-2">
+        {blocked?.isBlocked && (
+          <Lock className="h-3.5 w-3.5 text-destructive shrink-0 mt-0.5" />
         )}
-      >
-        {task.title}
-      </p>
+        <p
+          className={cn(
+            'font-medium leading-snug flex-1',
+            task.status === 'DONE' && 'line-through text-muted-foreground',
+          )}
+        >
+          {task.title}
+        </p>
+      </div>
+      {blocked?.isBlocked && (
+        <p className="text-[10px] text-destructive mt-1 truncate">
+          Blocked by: {blocked.blockedByTitles.join(', ')}
+        </p>
+      )}
       <div className="mt-2 flex items-center gap-1.5 flex-wrap">
         {task.priority && (
           <Badge

@@ -17,12 +17,15 @@ import {
 import KanbanColumn from './KanbanColumn';
 import KanbanCard from './KanbanCard';
 import { useUpdateTask, useReorderTasks } from '@/hooks/useTasks';
+import { useUIStore } from '@/stores/uiStore';
+import type { BlockedInfo } from '@/hooks/useBlockedTasks';
 
 interface KanbanBoardProps {
   tasks: any[];
   todoId: string;
   canEdit: boolean;
   onTaskClick: (task: any) => void;
+  blockedMap: Map<number, BlockedInfo>;
 }
 
 const columns = [
@@ -36,11 +39,13 @@ export default function KanbanBoard({
   todoId,
   canEdit,
   onTaskClick,
+  blockedMap,
 }: KanbanBoardProps) {
   const [localTasks, setLocalTasks] = useState<any[]>(tasks);
   const [activeId, setActiveId] = useState<number | null>(null);
   const updateTask = useUpdateTask();
   const reorderTasks = useReorderTasks();
+  const addToast = useUIStore((s) => s.addToast);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -103,6 +108,19 @@ export default function KanbanBoard({
     if (!movedTask || !originalTask) return;
 
     if (movedTask.status !== originalTask.status) {
+      const blocked = blockedMap.get(movedTask.id);
+      if (
+        movedTask.status === 'DONE' &&
+        blocked?.isBlocked
+      ) {
+        addToast({
+          type: 'error',
+          message: `Cannot mark as done. Blocked by: ${blocked.blockedByTitles.join(', ')}`,
+        });
+        setLocalTasks(tasks);
+        return;
+      }
+
       updateTask.mutate({
         todoId,
         taskId: movedTask.id,
@@ -148,6 +166,7 @@ export default function KanbanBoard({
                     key={task.id}
                     task={task}
                     onClick={() => onTaskClick(task)}
+                    blocked={blockedMap.get(task.id)}
                   />
                 ))}
               </SortableContext>

@@ -44,6 +44,7 @@ import {
   useCreateDependency,
   useDeleteDependency,
 } from '@/hooks/useDependencies';
+import { useBlockedTasks } from '@/hooks/useBlockedTasks';
 
 import {
   ArrowLeft,
@@ -57,6 +58,7 @@ import {
   Crown,
   UserPlus,
   Eye,
+  Lock,
   Pencil,
   Activity,
 } from 'lucide-react';
@@ -90,6 +92,7 @@ export default function TodoApp() {
   const { data: dependencies = [] } = useDependencies(id!);
   const createDep = useCreateDependency();
   const deleteDep = useDeleteDependency();
+  const blockedMap = useBlockedTasks(tasks ?? [], dependencies);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
@@ -331,83 +334,110 @@ export default function TodoApp() {
               todoId={id!}
               canEdit={canEdit}
               onTaskClick={(t) => setSelectedTask(String(t.id))}
+              blockedMap={blockedMap}
             />
           ) : (
             <div className="space-y-1">
-              {tasks.map((task: any) => (
-                <div
-                  key={task.id}
-                  className="group flex items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 transition-all hover:border-border hover:bg-card cursor-pointer"
-                  onClick={() => setSelectedTask(String(task.id))}
-                >
-                  {canEdit ? (
-                    <Checkbox
-                      checked={task.status === 'DONE'}
-                      onCheckedChange={(checked) => {
-                        updateTask.mutate({
-                          todoId: id!,
-                          taskId: task.id,
-                          data: { status: checked ? 'DONE' : 'TODO' },
-                        });
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                      className="shrink-0"
-                    />
-                  ) : (
-                    <div
-                      className={cn(
-                        'h-4 w-4 rounded-full border-2 shrink-0',
-                        task.status === 'DONE'
-                          ? 'bg-success border-success'
-                          : 'border-muted-foreground/40',
-                      )}
-                    />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p
-                      className={cn(
-                        'text-sm font-medium truncate',
-                        task.status === 'DONE' &&
-                          'line-through text-muted-foreground',
-                      )}
-                    >
-                      {task.title}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    {task.priority && (
-                      <Badge
-                        variant="secondary"
+              {tasks.map((task: any) => {
+                const blocked = blockedMap.get(task.id);
+                const isBlocked = blocked?.isBlocked ?? false;
+                return (
+                  <div
+                    key={task.id}
+                    className={cn(
+                      'group flex items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 transition-all hover:border-border hover:bg-card cursor-pointer',
+                      isBlocked && 'opacity-70',
+                    )}
+                    onClick={() => setSelectedTask(String(task.id))}
+                  >
+                    {canEdit ? (
+                      isBlocked && task.status !== 'DONE' ? (
+                        <span
+                          title={`Blocked by: ${blocked?.blockedByTitles?.join(', ')}`}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Lock className="h-4 w-4 text-destructive shrink-0" />
+                        </span>
+                      ) : (
+                        <Checkbox
+                          checked={task.status === 'DONE'}
+                          onCheckedChange={(checked) => {
+                            updateTask.mutate({
+                              todoId: id!,
+                              taskId: task.id,
+                              data: { status: checked ? 'DONE' : 'TODO' },
+                            });
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          className="shrink-0"
+                        />
+                      )
+                    ) : (
+                      <div
                         className={cn(
-                          'text-[0.6rem] px-1.5',
-                          priorityColors[task.priority],
+                          'h-4 w-4 rounded-full border-2 shrink-0',
+                          task.status === 'DONE'
+                            ? 'bg-success border-success'
+                            : isBlocked
+                              ? 'border-destructive/40'
+                              : 'border-muted-foreground/40',
+                        )}
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p
+                        className={cn(
+                          'text-sm font-medium truncate',
+                          task.status === 'DONE' &&
+                            'line-through text-muted-foreground',
                         )}
                       >
-                        {task.priority}
+                        {task.title}
+                      </p>
+                      {isBlocked && (
+                        <p className="text-[10px] text-destructive truncate">
+                          Blocked by: {blocked?.blockedByTitles?.join(', ')}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {task.priority && (
+                        <Badge
+                          variant="secondary"
+                          className={cn(
+                            'text-[0.6rem] px-1.5',
+                            priorityColors[task.priority],
+                          )}
+                        >
+                          {task.priority}
+                        </Badge>
+                      )}
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          'text-[0.6rem]',
+                          statusColors[task.status],
+                        )}
+                      >
+                        {task.status.replace('_', ' ')}
                       </Badge>
+                    </div>
+                    {canEdit && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 opacity-0 group-hover:opacity-100 shrink-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteTask.mutate({ todoId: id!, taskId: task.id });
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                      </Button>
                     )}
-                    <Badge
-                      variant="outline"
-                      className={cn('text-[0.6rem]', statusColors[task.status])}
-                    >
-                      {task.status.replace('_', ' ')}
-                    </Badge>
                   </div>
-                  {canEdit && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 opacity-0 group-hover:opacity-100 shrink-0"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteTask.mutate({ todoId: id!, taskId: task.id });
-                      }}
-                    >
-                      <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                    </Button>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
@@ -415,7 +445,7 @@ export default function TodoApp() {
             <div className="rounded-lg border border-border bg-muted/30 p-3 text-center">
               <Eye className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
               <p className="text-xs text-muted-foreground">
-                You have view-only access to this app.
+                You have view-only access to this todo.
               </p>
             </div>
           )}

@@ -340,6 +340,33 @@ export class TodoService {
       where: eq(allSchema.tasks.id, taskId),
     });
 
+    if (
+      updateTaskDto.status === 'DONE' &&
+      existing &&
+      existing.status !== 'DONE'
+    ) {
+      const prerequisiteDeps = await this.db
+        .select()
+        .from(allSchema.taskDependencies)
+        .where(eq(allSchema.taskDependencies.targetTaskId, taskId));
+
+      if (prerequisiteDeps.length > 0) {
+        const sourceTaskIds = prerequisiteDeps.map((d) => d.sourceTaskId);
+        const sourceTasks = await this.db
+          .select()
+          .from(allSchema.tasks)
+          .where(inArray(allSchema.tasks.id, sourceTaskIds));
+
+        const incomplete = sourceTasks.filter((t) => t.status !== 'DONE');
+        if (incomplete.length > 0) {
+          const names = incomplete.map((t) => t.title).join(', ');
+          throw new BadRequestException(
+            `Cannot mark as done. Blocked by: ${names}`,
+          );
+        }
+      }
+    }
+
     const updated = await this.db
       .update(allSchema.tasks)
       .set({ ...updateTaskDto, updatedAt: new Date() })
