@@ -3,7 +3,7 @@ import { useActivities } from '@/hooks/useTasks';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Activity, Loader2, ChevronDown } from 'lucide-react';
+import { Activity, ChevronDown } from 'lucide-react';
 
 interface ActivityFeedProps {
   todoId: string;
