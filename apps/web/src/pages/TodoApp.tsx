@@ -297,6 +297,21 @@ export default function TodoApp() {
                 </div>
               ))}
             </div>
+          ) : view === 'workflow' ? (
+            <WorkflowView
+              tasks={tasks ?? []}
+              dependencies={dependencies}
+              onNodeClick={(taskId) => setSelectedTask(String(taskId))}
+              onConnect={(src, tgt) =>
+                createDep.mutate({
+                  todoId: id!,
+                  sourceTaskId: src,
+                  targetTaskId: tgt,
+                })
+              }
+              onDeleteEdge={(depId) => deleteDep.mutate({ todoId: id!, depId })}
+              canEdit={canEdit}
+            />
           ) : !tasks || tasks.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <p className="text-muted-foreground">No tasks yet.</p>
@@ -311,23 +326,6 @@ export default function TodoApp() {
                 </Button>
               )}
             </div>
-          ) : view === 'workflow' ? (
-            <WorkflowView
-              tasks={tasks}
-              dependencies={dependencies}
-              onNodeClick={(taskId) => setSelectedTask(String(taskId))}
-              onConnect={(src, tgt) =>
-                createDep.mutate({
-                  todoId: id!,
-                  sourceTaskId: src,
-                  targetTaskId: tgt,
-                })
-              }
-              onDeleteEdge={(depId) =>
-                deleteDep.mutate({ todoId: id!, depId })
-              }
-              canEdit={canEdit}
-            />
           ) : view === 'kanban' ? (
             <KanbanBoard
               tasks={tasks}

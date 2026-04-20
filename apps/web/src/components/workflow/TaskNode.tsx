@@ -28,9 +28,7 @@ export type TaskNodeData = {
 function TaskNodeComponent({ data }: NodeProps) {
   const nodeData = data as unknown as TaskNodeData;
   const status = statusConfig[nodeData.status] || statusConfig.TODO;
-  const priority = nodeData.priority
-    ? priorityConfig[nodeData.priority]
-    : null;
+  const priority = nodeData.priority ? priorityConfig[nodeData.priority] : null;
 
   const borderColor = nodeData.isBlocked
     ? 'border-destructive/40 border-dashed'
@@ -42,7 +40,11 @@ function TaskNodeComponent({ data }: NodeProps) {
 
   return (
     <>
-      <Handle type="target" position={Position.Top} className="!w-2 !h-2" />
+      <Handle
+        type="target"
+        position={Position.Top}
+        isConnectableStart={false}
+      />
       <div
         className={cn(
           'rounded-lg border-2 bg-card px-4 py-3 shadow-sm min-w-[160px] max-w-[220px] group relative',
@@ -60,12 +62,17 @@ function TaskNodeComponent({ data }: NodeProps) {
             <Lock className="w-3 h-3 text-destructive shrink-0" />
           )}
           {priority && !nodeData.isBlocked && (
-            <span className={cn('w-2 h-2 rounded-full shrink-0', priority.dot)} />
+            <span
+              className={cn('w-2 h-2 rounded-full shrink-0', priority.dot)}
+            />
           )}
           <span className="text-sm font-medium truncate">{nodeData.label}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0', status.color)}>
+          <Badge
+            variant="outline"
+            className={cn('text-[10px] px-1.5 py-0', status.color)}
+          >
             {status.label}
           </Badge>
           {nodeData.isBlocked && (
@@ -73,7 +80,11 @@ function TaskNodeComponent({ data }: NodeProps) {
           )}
         </div>
       </div>
-      <Handle type="source" position={Position.Bottom} className="!w-2 !h-2" />
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        isConnectableEnd={false}
+      />
     </>
   );
 }

@@ -1,11 +1,12 @@
 import { useCallback, useMemo, useEffect } from 'react';
 import {
   ReactFlow,
+  ReactFlowProvider,
   Background,
   Controls,
-  MiniMap,
   useNodesState,
   useEdgesState,
+  useReactFlow,
   addEdge,
   type Node,
   type Edge,
@@ -25,6 +26,7 @@ import { LayoutGrid } from 'lucide-react';
 
 const nodeTypes = { task: TaskNodeComponent };
 const edgeTypes = { dependency: TaskEdge };
+const FIT_PADDING = 0.4;
 
 interface WorkflowViewProps {
   tasks: any[];
@@ -35,7 +37,7 @@ interface WorkflowViewProps {
   canEdit: boolean;
 }
 
-export default function WorkflowView({
+function WorkflowViewInner({
   tasks,
   dependencies,
   onNodeClick,
@@ -43,6 +45,8 @@ export default function WorkflowView({
   onDeleteEdge,
   canEdit,
 }: WorkflowViewProps) {
+  const { fitView } = useReactFlow();
+
   const depIdMap = useMemo(() => {
     const map = new Map<string, number>();
     dependencies.forEach((d) => {
@@ -77,7 +81,7 @@ export default function WorkflowView({
       target: String(d.targetTaskId),
       type: 'dependency',
       animated: true,
-      style: { stroke: 'hsl(var(--primary))', strokeWidth: 2 },
+      style: { stroke: 'var(--color-primary)', strokeWidth: 2 },
     }));
 
     const { nodes, edges } = getLayoutedElements(rawNodes, rawEdges);
@@ -90,7 +94,10 @@ export default function WorkflowView({
   useEffect(() => {
     setNodes(layoutedNodes);
     setEdges(layoutedEdges);
-  }, [layoutedNodes, layoutedEdges, setNodes, setEdges]);
+    requestAnimationFrame(() => {
+      fitView({ padding: FIT_PADDING });
+    });
+  }, [layoutedNodes, layoutedEdges, setNodes, setEdges, fitView]);
 
   const handleConnect = useCallback(
     (connection: Connection) => {
@@ -103,7 +110,7 @@ export default function WorkflowView({
         target: connection.target,
         type: 'dependency',
         animated: true,
-        style: { stroke: 'hsl(var(--primary))', strokeWidth: 2, opacity: 0.5 },
+        style: { stroke: 'var(--color-primary)', strokeWidth: 2, opacity: 0.5 },
       };
       setEdges((prev) => addEdge(optimisticEdge, prev));
 
@@ -132,7 +139,10 @@ export default function WorkflowView({
     const { nodes: laid, edges: laidEdges } = getLayoutedElements(nodes, edges);
     setNodes([...laid]);
     setEdges([...laidEdges]);
-  }, [nodes, edges, setNodes, setEdges]);
+    requestAnimationFrame(() => {
+      fitView({ padding: FIT_PADDING });
+    });
+  }, [nodes, edges, setNodes, setEdges, fitView]);
 
   const edgesWithDeleteHandler = useMemo(
     () =>
@@ -155,17 +165,29 @@ export default function WorkflowView({
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
-        
+        fitViewOptions={{ padding: FIT_PADDING }}
         proOptions={{ hideAttribution: true }}
         className="bg-background"
       >
         <Background variant={BackgroundVariant.Dots} gap={20} size={1} />
         <Controls />
-        <MiniMap
-          nodeStrokeWidth={3}
-          className="!bg-muted !border-border"
-        />
       </ReactFlow>
+      {nodes.length === 0 && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="text-center text-muted-foreground">
+            <p className="text-sm font-medium">No tasks to display</p>
+            <p className="text-xs mt-1">
+              Add tasks first, then drag between node handles to create
+              dependencies
+            </p>
+          </div>
+        </div>
+      )}
+      {nodes.length > 0 && (
+        <div className="absolute top-3 left-3 z-10 text-[10px] text-muted-foreground bg-card/80 backdrop-blur-sm rounded px-2 py-1 border border-border">
+          Drag from bottom handle to top handle to connect tasks
+        </div>
+      )}
       <div className="absolute top-3 right-3 z-10">
         <Button size="sm" variant="outline" onClick={onAutoLayout}>
           <LayoutGrid className="w-4 h-4 mr-1" />
@@ -173,5 +195,13 @@ export default function WorkflowView({
         </Button>
       </div>
     </div>
+  );
+}
+
+export default function WorkflowView(props: WorkflowViewProps) {
+  return (
+    <ReactFlowProvider>
+      <WorkflowViewInner {...props} />
+    </ReactFlowProvider>
   );
 }

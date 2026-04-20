@@ -3,56 +3,12 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme inline {
+@theme {
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.625rem;
   --radius-xl: 0.875rem;
 
-  /* Dark theme values (default for @theme) */
-  --color-background: oklch(0.145 0.015 285);
-  --color-foreground: oklch(0.985 0.002 247);
-  --color-card: oklch(0.178 0.015 285);
-  --color-card-foreground: oklch(0.985 0.002 247);
-  --color-popover: oklch(0.178 0.015 285);
-  --color-popover-foreground: oklch(0.985 0.002 247);
-  --color-primary: oklch(0.62 0.19 264);
-  --color-primary-foreground: oklch(0.985 0.002 247);
-  --color-secondary: oklch(0.269 0.015 285);
-  --color-secondary-foreground: oklch(0.985 0.002 247);
-  --color-muted: oklch(0.269 0.015 285);
-  --color-muted-foreground: oklch(0.65 0.025 264);
-  --color-accent: oklch(0.269 0.015 285);
-  --color-accent-foreground: oklch(0.985 0.002 247);
-  --color-destructive: oklch(0.55 0.2 27);
-  --color-destructive-foreground: oklch(0.985 0.002 247);
-  --color-border: oklch(0.3 0.015 285);
-  --color-input: oklch(0.3 0.015 285);
-  --color-ring: oklch(0.62 0.19 264);
-  --color-chart-1: oklch(0.62 0.19 264);
-  --color-chart-2: oklch(0.55 0.2 160);
-  --color-chart-3: oklch(0.62 0.2 310);
-  --color-chart-4: oklch(0.7 0.15 75);
-  --color-chart-5: oklch(0.65 0.2 27);
-  --color-sidebar: oklch(0.178 0.015 285);
-  --color-sidebar-foreground: oklch(0.985 0.002 247);
-  --color-sidebar-primary: oklch(0.62 0.19 264);
-  --color-sidebar-primary-foreground: oklch(0.985 0.002 247);
-  --color-sidebar-accent: oklch(0.269 0.015 285);
-  --color-sidebar-accent-foreground: oklch(0.985 0.002 247);
-  --color-sidebar-border: oklch(0.3 0.015 285);
-  --color-sidebar-ring: oklch(0.62 0.19 264);
-  --color-success: oklch(0.62 0.19 160);
-  --color-warning: oklch(0.75 0.18 75);
-}
-
-/*
-  Light theme override: when the html element does NOT have .dark,
-  we swap the CSS custom properties to light values.
-  Since Tailwind v4 @theme registers the token names, the utility classes
-  automatically resolve via the underlying custom properties.
-*/
-html:not(.dark) {
   --color-background: oklch(0.985 0.002 247);
   --color-foreground: oklch(0.145 0.015 285);
   --color-card: oklch(0.995 0.001 247);
@@ -89,6 +45,43 @@ html:not(.dark) {
   --color-warning: oklch(0.70 0.18 75);
 }
 
+html.dark {
+  --color-background: oklch(0.145 0.015 285);
+  --color-foreground: oklch(0.985 0.002 247);
+  --color-card: oklch(0.178 0.015 285);
+  --color-card-foreground: oklch(0.985 0.002 247);
+  --color-popover: oklch(0.178 0.015 285);
+  --color-popover-foreground: oklch(0.985 0.002 247);
+  --color-primary: oklch(0.62 0.19 264);
+  --color-primary-foreground: oklch(0.985 0.002 247);
+  --color-secondary: oklch(0.269 0.015 285);
+  --color-secondary-foreground: oklch(0.985 0.002 247);
+  --color-muted: oklch(0.269 0.015 285);
+  --color-muted-foreground: oklch(0.65 0.025 264);
+  --color-accent: oklch(0.269 0.015 285);
+  --color-accent-foreground: oklch(0.985 0.002 247);
+  --color-destructive: oklch(0.55 0.2 27);
+  --color-destructive-foreground: oklch(0.985 0.002 247);
+  --color-border: oklch(0.3 0.015 285);
+  --color-input: oklch(0.3 0.015 285);
+  --color-ring: oklch(0.62 0.19 264);
+  --color-chart-1: oklch(0.62 0.19 264);
+  --color-chart-2: oklch(0.55 0.2 160);
+  --color-chart-3: oklch(0.62 0.2 310);
+  --color-chart-4: oklch(0.7 0.15 75);
+  --color-chart-5: oklch(0.65 0.2 27);
+  --color-sidebar: oklch(0.178 0.015 285);
+  --color-sidebar-foreground: oklch(0.985 0.002 247);
+  --color-sidebar-primary: oklch(0.62 0.19 264);
+  --color-sidebar-primary-foreground: oklch(0.985 0.002 247);
+  --color-sidebar-accent: oklch(0.269 0.015 285);
+  --color-sidebar-accent-foreground: oklch(0.985 0.002 247);
+  --color-sidebar-border: oklch(0.3 0.015 285);
+  --color-sidebar-ring: oklch(0.62 0.19 264);
+  --color-success: oklch(0.62 0.19 160);
+  --color-warning: oklch(0.75 0.18 75);
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -100,18 +93,29 @@ html:not(.dark) {
 }
 
 .workflow-canvas .react-flow__handle {
-  width: 10px;
-  height: 10px;
-  background: hsl(var(--primary));
-  border: 2px solid hsl(var(--background));
-  opacity: 0;
+  width: 12px;
+  height: 12px;
+  background: var(--color-primary);
+  border: 2px solid var(--color-background);
+  opacity: 0.35;
   transition: opacity 0.15s, transform 0.15s;
 }
-.workflow-canvas .react-flow__node:hover .react-flow__handle,
 .workflow-canvas .react-flow__handle:hover {
   opacity: 1;
   transform: scale(1.3);
+  cursor: crosshair;
 }
-.workflow-canvas .react-flow__handle.connecting {
+.workflow-canvas .react-flow__handle.connecting,
+.workflow-canvas .react-flow__handle.connectingto {
   opacity: 1;
+  background: var(--color-primary);
+  transform: scale(1.3);
+}
+.workflow-canvas .react-flow__edge path.react-flow__edge-path {
+  stroke: var(--color-primary);
+  stroke-width: 2;
+}
+.workflow-canvas .react-flow__connection-path {
+  stroke: var(--color-primary);
+  stroke-width: 2;
 }

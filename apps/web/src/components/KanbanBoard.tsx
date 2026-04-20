@@ -51,12 +51,16 @@ export default function KanbanBoard({
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
 
-  if (
-    JSON.stringify(tasks.map((t) => t.id)) !==
-      JSON.stringify(localTasks.map((t) => t.id)) ||
-    tasks.some((t, i) => localTasks[i] && t.status !== localTasks[i].status)
-  ) {
-    setLocalTasks(tasks);
+  if (activeId === null) {
+    const idsChanged =
+      JSON.stringify(tasks.map((t) => t.id)) !==
+      JSON.stringify(localTasks.map((t) => t.id));
+    const statusChanged = tasks.some(
+      (t, i) => localTasks[i] && t.status !== localTasks[i].status,
+    );
+    if (idsChanged || statusChanged) {
+      setLocalTasks(tasks);
+    }
   }
 
   const getTasksByStatus = (status: string) =>
@@ -109,10 +113,7 @@ export default function KanbanBoard({
 
     if (movedTask.status !== originalTask.status) {
       const blocked = blockedMap.get(movedTask.id);
-      if (
-        movedTask.status === 'DONE' &&
-        blocked?.isBlocked
-      ) {
+      if (movedTask.status === 'DONE' && blocked?.isBlocked) {
         addToast({
           type: 'error',
           message: `Cannot mark as done. Blocked by: ${blocked.blockedByTitles.join(', ')}`,
@@ -146,7 +147,7 @@ export default function KanbanBoard({
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 flex-1 min-h-0">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {columns.map((col) => {
           const colTasks = getTasksByStatus(col.id);
           return (
