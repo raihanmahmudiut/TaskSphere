@@ -92,7 +92,7 @@ export default function CommandPalette() {
             navigate(`/todo/${app.id}`);
             setOpen(false);
           },
-          section: 'Todo Apps',
+          section: 'Todos',
         });
       });
     }

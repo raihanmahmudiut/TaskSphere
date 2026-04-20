@@ -40,8 +40,9 @@ A **real-time collaborative task management platform** built with a modern TypeS
 ## Features
 
 - **Authentication** — Register/login with JWT, profile management
-- **Todo Apps** — Create multiple project workspaces
+- **Todos** — Create multiple project workspaces to organize tasks
 - **Task Management** — CRUD with status (Todo/In Progress/Done), priority (Low/Medium/High), sorting, and filtering
+- **Dependency Enforcement** — Tasks cannot be marked done until their prerequisites are completed
 - **Multiple Views** — List view, Kanban board (drag & drop), and interactive Workflow graph
 - **Workflow View** — Visualize task dependencies as a directed graph with React Flow, auto-layout via dagre, and cycle detection
 - **Real-time Collaboration** — Invite collaborators (Owner/Editor/Viewer roles), live updates via WebSocket

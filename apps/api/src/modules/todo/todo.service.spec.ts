@@ -204,6 +204,66 @@ describe('TodoService', () => {
     });
   });
 
+  describe('updateTask - dependency enforcement', () => {
+    it('should block marking DONE when prerequisites are not done', async () => {
+      mockDb.query.tasks.findFirst.mockResolvedValue({
+        id: 10,
+        status: 'TODO',
+        todoAppId: 1,
+      });
+
+      mockDb.select.mockReturnValue({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockResolvedValue([
+            { id: 1, sourceTaskId: 5, targetTaskId: 10, todoAppId: 1 },
+          ]),
+        }),
+      });
+
+      await expect(
+        service.updateTask(10, { status: 'DONE' } as any),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should allow marking DONE when all prerequisites are done', async () => {
+      mockDb.query.tasks.findFirst.mockResolvedValue({
+        id: 10,
+        status: 'TODO',
+        todoAppId: 1,
+      });
+
+      let selectCallCount = 0;
+      mockDb.select.mockImplementation(() => ({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockImplementation(() => {
+            selectCallCount++;
+            if (selectCallCount === 1) {
+              return Promise.resolve([
+                { id: 1, sourceTaskId: 5, targetTaskId: 10, todoAppId: 1 },
+              ]);
+            }
+            return Promise.resolve([
+              { id: 5, status: 'DONE', title: 'Prereq' },
+            ]);
+          }),
+        }),
+      }));
+
+      mockDb.update.mockReturnValue({
+        set: jest.fn().mockReturnValue({
+          where: jest.fn().mockReturnValue({
+            returning: jest.fn().mockResolvedValue([
+              { id: 10, status: 'DONE', todoAppId: 1, title: 'Task' },
+            ]),
+          }),
+        }),
+      });
+
+      const result = await service.updateTask(10, { status: 'DONE' } as any);
+      expect(result.status).toBe('DONE');
+    });
+  });
+
   describe('createDependency - cycle detection', () => {
     it('should reject self-dependency', async () => {
       await expect(

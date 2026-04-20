@@ -39,7 +39,7 @@ vi.mock('../../hooks/useAuth', () => ({
 }));
 
 describe('Dashboard', () => {
-  it('renders todo app cards', () => {
+  it('renders todo cards', () => {
     render(<Dashboard />);
 
     expect(screen.getByText('Test App')).toBeInTheDocument();
@@ -60,11 +60,11 @@ describe('Dashboard', () => {
     expect(screen.getByText('Shared')).toBeInTheDocument();
   });
 
-  it('renders the new app button', () => {
+  it('renders the new todo button', () => {
     render(<Dashboard />);
 
     expect(
-      screen.getByRole('button', { name: /new app/i }),
+      screen.getByRole('button', { name: /new todo/i }),
     ).toBeInTheDocument();
   });
 });

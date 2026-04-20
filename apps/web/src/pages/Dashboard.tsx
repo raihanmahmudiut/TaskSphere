@@ -158,7 +158,7 @@ export default function Dashboard() {
             className="gap-1.5"
           >
             <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">New App</span>
+            <span className="hidden sm:inline">New Todo</span>
           </Button>
         </header>
 
@@ -185,7 +185,7 @@ export default function Dashboard() {
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
                 <ListTodo className="h-8 w-8 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-medium">No todo apps yet</h3>
+              <h3 className="text-lg font-medium">No todos yet</h3>
               <p className="mt-1 text-sm text-muted-foreground">
                 Create your first app to get started.
               </p>
@@ -194,7 +194,7 @@ export default function Dashboard() {
                 className="mt-4 gap-1.5"
               >
                 <Plus className="h-4 w-4" />
-                Create App
+                Create Todo
               </Button>
             </div>
           ) : (
@@ -264,9 +264,9 @@ export default function Dashboard() {
         <DialogContent>
           <DialogClose onClick={() => setCreateOpen(false)} />
           <DialogHeader>
-            <DialogTitle>Create new app</DialogTitle>
+            <DialogTitle>Create new todo</DialogTitle>
             <DialogDescription>
-              Give your todo app a name to get started.
+              Give your todo a name to get started.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleCreateApp}>
