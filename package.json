@@ -9,6 +9,7 @@
     "format": "prettier --write \"apps/**/*.{ts,tsx}\" \"packages/**/*.ts\"",
     "format:check": "prettier --check \"apps/**/*.{ts,tsx}\" \"packages/**/*.ts\"",
     "typecheck": "turbo run typecheck",
+    "test:e2e": "playwright test",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -25,6 +26,7 @@
     ]
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "prettier": "^3.8.3",
