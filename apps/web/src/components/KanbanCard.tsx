@@ -46,7 +46,7 @@ export default function KanbanCard({
       style={style}
       {...attributes}
       {...listeners}
-      onClick={onClick}
+      onClick={isOverlay ? undefined : onClick}
       className={cn(
         'rounded-lg border border-border bg-card p-3 cursor-pointer hover:border-primary/30 transition-all text-sm',
         isDragging && 'opacity-30',

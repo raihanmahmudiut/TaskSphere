@@ -4,6 +4,7 @@ import {
   DragOverlay,
   closestCorners,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   type DragStartEvent,
@@ -49,6 +50,12 @@ export default function KanbanBoard({
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,        // ms before drag activates — distinguishes tap from drag
+        tolerance: 5,      // px of movement allowed during delay
+      },
+    }),
   );
 
   if (activeId === null) {
