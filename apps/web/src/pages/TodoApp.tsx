@@ -136,17 +136,17 @@ export default function TodoApp() {
     ];
     events.forEach((e) =>
       socket.on(e, () => {
-        queryClient.invalidateQueries({ queryKey: ['tasks', id] });
-        queryClient.invalidateQueries({ queryKey: ['todoApp', id] });
+        queryClient.refetchQueries({ queryKey: ['tasks', id], type: 'active' });
+        queryClient.refetchQueries({ queryKey: ['todoApp', id], type: 'active' });
       }),
     );
     ['dependencyCreated', 'dependencyDeleted'].forEach((e) =>
       socket.on(e, () => {
-        queryClient.invalidateQueries({ queryKey: ['dependencies', id] });
+        queryClient.refetchQueries({ queryKey: ['dependencies', id], type: 'active' });
       }),
     );
     socket.on('activityCreated', () => {
-      queryClient.invalidateQueries({ queryKey: ['activities', id] });
+      queryClient.refetchQueries({ queryKey: ['activities', id], type: 'active' });
     });
 
     return () => {
