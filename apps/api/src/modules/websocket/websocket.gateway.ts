@@ -15,16 +15,15 @@ import { ConfigService } from '@nestjs/config';
     origin: process.env.CORS_ORIGIN
       ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
       : [
-          'http://localhost:3000',
-          'http://localhost:4000',
-          'http://localhost:5173',
-        ],
+        'http://localhost:3000',
+        'http://localhost:4000',
+        'http://localhost:5173',
+      ],
     credentials: true,
   },
 })
 export class WebsocketGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
-{
+  implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('WebsocketGateway');
   private jwtSecret: string;
@@ -94,5 +93,35 @@ export class WebsocketGateway
     client.leave(room);
     this.logger.log(`Client ${client.id} left room: ${room}`);
     client.emit('leftRoom', room);
+  }
+
+  @SubscribeMessage('joinTodoApp')
+  handleJoinTodoApp(client: Socket, todoAppId: number): void {
+    if (!client.data.user) {
+      client.emit('error', { message: 'Authentication required' });
+      return;
+    }
+
+    const room = `todo-app-${todoAppId}`;
+    client.join(room);
+    this.logger.log(
+      `Client ${client.id} (user: ${client.data.user.email}) joined todo-app room: ${room}`,
+    );
+    client.emit('joinedTodoApp', room);
+  }
+
+  @SubscribeMessage('leaveTodoApp')
+  handleLeaveTodoApp(client: Socket, todoAppId: number): void {
+    if (!client.data.user) {
+      client.emit('error', { message: 'Authentication required' });
+      return;
+    }
+
+    const room = `todo-app-${todoAppId}`;
+    client.leave(room);
+    this.logger.log(
+      `Client ${client.id} left todo-app room: ${room}`,
+    );
+    client.emit('leftTodoApp', room);
   }
 }
