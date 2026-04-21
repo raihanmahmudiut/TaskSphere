@@ -15,6 +15,7 @@ import {
 } from '@/hooks/useTasks';
 import { useProfile } from '@/hooks/useAuth';
 import { useFilterParams } from '@/hooks/useFilterParams';
+import { useAuthStore } from '@/stores/authStore';
 import { useQueryClient } from '@tanstack/react-query';
 import { searchUserByEmail } from '@/api/collaborators';
 
@@ -114,9 +115,13 @@ export default function TodoApp() {
   // WebSocket for real-time updates
   useEffect(() => {
     if (!id) return;
+    const token = useAuthStore.getState().token;
     const socket = io(
       import.meta.env.VITE_API_URL || `http://${window.location.hostname}:3000`,
-      { transports: ['websocket'] },
+      {
+        transports: ['websocket'],
+        auth: { token },
+      },
     );
     socket.emit('joinTodoApp', parseInt(id, 10));
 
