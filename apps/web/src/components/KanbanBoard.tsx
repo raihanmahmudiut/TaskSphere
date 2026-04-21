@@ -15,6 +15,9 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
+import {
+  restrictToWindowEdges,
+} from '@dnd-kit/modifiers';
 import KanbanColumn from './KanbanColumn';
 import KanbanCard from './KanbanCard';
 import { useUpdateTask, useReorderTasks } from '@/hooks/useTasks';
@@ -150,6 +153,7 @@ export default function KanbanBoard({
     <DndContext
       sensors={sensors}
       collisionDetection={closestCorners}
+      modifiers={[restrictToWindowEdges]} 
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
