@@ -6,9 +6,9 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "format": "prettier --write \"apps/**/*.{ts,tsx}\" \"packages/**/*.ts\"",
-    "format:check": "prettier --check \"apps/**/*.{ts,tsx}\" \"packages/**/*.ts\"",
     "typecheck": "turbo run typecheck",
+    "format": "turbo run format",
+    "format:check": "turbo run format:check",
     "test:e2e": "playwright test",
     "prepare": "husky"
   },

@@ -9,33 +9,42 @@ on:
 jobs:
   quality:
     runs-on: ubuntu-latest
+
     steps:
+      # 1️⃣ Checkout repo
       - uses: actions/checkout@v4
 
+      # 2️⃣ Install pnpm (reads packageManager automatically)
       - uses: pnpm/action-setup@v4
 
+      # 3️⃣ Setup Node + pnpm cache
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
 
+      # 4️⃣ Turbo cache (BIG SPEED BOOST)
+      - name: Restore Turbo Cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+
+      # 5️⃣ Install dependencies
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Prettier check
+      # 🚀 Turbo Tasks
+      - name: Format
         run: pnpm format:check
 
-      - name: Lint API
-        run: pnpm --filter @tasksphere/api lint
+      - name: Lint
+        run: pnpm lint
 
-      - name: Lint Web
-        run: pnpm --filter web lint
-
-      - name: Typecheck API
-        run: pnpm --filter @tasksphere/api typecheck
-
-      - name: Typecheck Web
-        run: pnpm --filter web typecheck
+      - name: Typecheck
+        run: pnpm typecheck
 
       - name: Build
         run: pnpm build
