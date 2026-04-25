@@ -2,10 +2,10 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/",
-      "git": {
-        "deploymentEnabled": false
-      }
+      "destination": "/"
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": false
+  }
 }
