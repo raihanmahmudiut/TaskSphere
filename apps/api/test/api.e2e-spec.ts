@@ -6,7 +6,6 @@ import { AppModule } from '../src/app.module';
 describe('API (e2e)', () => {
   let app: INestApplication;
   let token: string;
-  let userUuid: string;
   let todoAppId: number;
   let taskId: number;
 
@@ -47,7 +46,6 @@ describe('API (e2e)', () => {
       expect(res.body.accessToken).toBeDefined();
       expect(res.body.user.email).toBe(testEmail);
       token = res.body.accessToken;
-      userUuid = res.body.user.uuid;
     });
 
     it('POST /auth/login should authenticate', async () => {

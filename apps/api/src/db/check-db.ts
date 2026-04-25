@@ -5,7 +5,7 @@ import * as path from 'path';
 dotenv.config({ path: path.join(__dirname, '../../../../.env') });
 
 async function check() {
-  // @ts-ignore
+  // @ts-expect-error - postgres.default may not exist in some versions
   const sql = (postgres.default || postgres)(process.env.DATABASE_URL!);
   try {
     const tables = await sql`
