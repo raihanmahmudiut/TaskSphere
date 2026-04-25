@@ -1,11 +1,9 @@
 {
+  "name": "tasksphere",
   "rewrites": [
     {
       "source": "/(.*)",
       "destination": "/"
     }
-  ],
-  "git": {
-    "deploymentEnabled": false
-  }
+  ]
 }
