@@ -1,4 +1,10 @@
-import { pgTable, serial, integer, timestamp, unique } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  serial,
+  integer,
+  timestamp,
+  unique,
+} from 'drizzle-orm/pg-core';
 import { tasks } from './tasks';
 import { todoApps } from './todoApps';
 

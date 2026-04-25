@@ -15,9 +15,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import {
-  restrictToWindowEdges,
-} from '@dnd-kit/modifiers';
+import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import KanbanColumn from './KanbanColumn';
 import KanbanCard from './KanbanCard';
 import { useUpdateTask, useReorderTasks } from '@/hooks/useTasks';
@@ -55,8 +53,8 @@ export default function KanbanBoard({
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 250,        // ms before drag activates — distinguishes tap from drag
-        tolerance: 5,      // px of movement allowed during delay
+        delay: 250, // ms before drag activates — distinguishes tap from drag
+        tolerance: 5, // px of movement allowed during delay
       },
     }),
   );
@@ -153,7 +151,7 @@ export default function KanbanBoard({
     <DndContext
       sensors={sensors}
       collisionDetection={closestCorners}
-      modifiers={[restrictToWindowEdges]} 
+      modifiers={[restrictToWindowEdges]}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}

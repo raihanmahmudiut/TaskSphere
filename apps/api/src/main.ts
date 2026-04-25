@@ -9,7 +9,10 @@ async function bootstrap() {
   const allowedOrigins = process.env.CORS_ORIGIN
     ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
     : ['http://localhost:5173'];
-  Logger.log(`[CORS] Allowed origins: ${JSON.stringify(allowedOrigins)}`, 'Bootstrap');
+  Logger.log(
+    `[CORS] Allowed origins: ${JSON.stringify(allowedOrigins)}`,
+    'Bootstrap',
+  );
   app.enableCors({
     origin: allowedOrigins,
     credentials: true,

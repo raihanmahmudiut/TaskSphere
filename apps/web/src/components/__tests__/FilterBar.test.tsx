@@ -34,7 +34,9 @@ describe('FilterBar', () => {
 
   it('renders the Filters toggle button', () => {
     render(<FilterBar {...defaultProps} />);
-    expect(screen.getByRole('button', { name: /filters/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /filters/i }),
+    ).toBeInTheDocument();
   });
 
   it('expands filter badges when Filters button is clicked', async () => {
@@ -60,7 +62,11 @@ describe('FilterBar', () => {
     const clearFilters = vi.fn();
     const user = userEvent.setup();
     render(
-      <FilterBar {...defaultProps} hasActiveFilters clearFilters={clearFilters} />,
+      <FilterBar
+        {...defaultProps}
+        hasActiveFilters
+        clearFilters={clearFilters}
+      />,
     );
 
     await user.click(screen.getByRole('button', { name: /clear/i }));

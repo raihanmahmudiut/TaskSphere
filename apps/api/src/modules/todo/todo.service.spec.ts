@@ -214,9 +214,11 @@ describe('TodoService', () => {
 
       mockDb.select.mockReturnValue({
         from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([
-            { id: 1, sourceTaskId: 5, targetTaskId: 10, todoAppId: 1 },
-          ]),
+          where: jest
+            .fn()
+            .mockResolvedValue([
+              { id: 1, sourceTaskId: 5, targetTaskId: 10, todoAppId: 1 },
+            ]),
         }),
       });
 
@@ -252,9 +254,11 @@ describe('TodoService', () => {
       mockDb.update.mockReturnValue({
         set: jest.fn().mockReturnValue({
           where: jest.fn().mockReturnValue({
-            returning: jest.fn().mockResolvedValue([
-              { id: 10, status: 'DONE', todoAppId: 1, title: 'Task' },
-            ]),
+            returning: jest
+              .fn()
+              .mockResolvedValue([
+                { id: 10, status: 'DONE', todoAppId: 1, title: 'Task' },
+              ]),
           }),
         }),
       });
@@ -266,24 +270,26 @@ describe('TodoService', () => {
 
   describe('createDependency - cycle detection', () => {
     it('should reject self-dependency', async () => {
-      await expect(
-        service.createDependency(1, 5, 5),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.createDependency(1, 5, 5)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should reject circular dependency', async () => {
       // A->B exists, trying to add B->A
       mockDb.select.mockReturnValue({
         from: jest.fn().mockReturnValue({
-          where: jest.fn().mockResolvedValue([
-            { id: 1, sourceTaskId: 10, targetTaskId: 20, todoAppId: 1 },
-          ]),
+          where: jest
+            .fn()
+            .mockResolvedValue([
+              { id: 1, sourceTaskId: 10, targetTaskId: 20, todoAppId: 1 },
+            ]),
         }),
       });
 
-      await expect(
-        service.createDependency(1, 20, 10),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.createDependency(1, 20, 10)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 });

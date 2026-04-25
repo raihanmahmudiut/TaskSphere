@@ -13,6 +13,8 @@
 
     "typecheck": {},
 
+    "format": {},
+
     "format:check": {},
 
     "test": {

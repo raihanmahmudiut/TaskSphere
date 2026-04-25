@@ -5,7 +5,7 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
-import { Logger, UnauthorizedException } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import * as jwt from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
@@ -15,15 +15,16 @@ import { ConfigService } from '@nestjs/config';
     origin: process.env.CORS_ORIGIN
       ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
       : [
-        'http://localhost:3000',
-        'http://localhost:4000',
-        'http://localhost:5173',
-      ],
+          'http://localhost:3000',
+          'http://localhost:4000',
+          'http://localhost:5173',
+        ],
     credentials: true,
   },
 })
 export class WebsocketGateway
-  implements OnGatewayConnection, OnGatewayDisconnect {
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('WebsocketGateway');
   private jwtSecret: string;
@@ -56,7 +57,7 @@ export class WebsocketGateway
       this.logger.log(
         `Client ${client.id} connected and authenticated as ${decoded.email}`,
       );
-    } catch (error) {
+    } catch {
       this.logger.warn(
         `Client ${client.id} attempted to connect with invalid token`,
       );
@@ -119,9 +120,7 @@ export class WebsocketGateway
 
     const room = `todo-app-${todoAppId}`;
     client.leave(room);
-    this.logger.log(
-      `Client ${client.id} left todo-app room: ${room}`,
-    );
+    this.logger.log(`Client ${client.id} left todo-app room: ${room}`);
     client.emit('leftTodoApp', room);
   }
 }
